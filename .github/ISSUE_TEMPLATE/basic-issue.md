@@ -13,7 +13,7 @@ assignees: ''
 
 ## User Story
 
-<!--As a [BLANK], when I [BLANK] I want to [BLANK] so that I can [BLANK]-->
+As a [BLANK], when I [BLANK] I want to [BLANK] so that I can [BLANK].
 
 ## Required Files
 
