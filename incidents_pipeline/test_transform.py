@@ -1,6 +1,8 @@
 """Script for testing transform.py"""
 
-from transform import get_filtered_message
+from datetime import datetime
+
+from transform import get_filtered_message, get_corrected_types
 
 
 def test_get_filtered_message_valid_columns(test_incident_message):
@@ -22,3 +24,35 @@ def test_get_filtered_message_valid_values(test_incident_message):
     assert filtered_message["incident_end"] == "2026-02-03T18:05:00.000Z"
     assert filtered_message["url"] == "https://www.nationalrail.co.uk/service-disruptions/arbroath-20260203/"
     assert filtered_message["planned"] == "true"
+
+
+def test_get_corrected_types_valid_types():
+
+    test_dict = {
+        "incident_start": "2026-02-03T14:05:00.000Z",
+        "incident_end": "2026-02-03T18:05:00.000Z",
+        "planned": "true"
+    }
+
+    actual_dict = get_corrected_types(test_dict)
+
+    assert isinstance(actual_dict["incident_start"], datetime)
+    assert isinstance(actual_dict["incident_end"], datetime)
+    assert isinstance(actual_dict["planned"], bool)
+
+
+def test_get_corrected_types_valid_values():
+
+    test_dict = {
+        "incident_start": "2026-02-03T14:05:00.000Z",
+        "incident_end": "2026-02-03T18:05:00.000Z",
+        "planned": "true"
+    }
+
+    actual_dict = get_corrected_types(test_dict)
+
+    assert actual_dict["incident_start"] == datetime.fromisoformat(
+        test_dict["incident_start"])
+    assert actual_dict["incident_end"] == datetime.fromisoformat(
+        test_dict["incident_end"])
+    assert actual_dict["planned"] == True

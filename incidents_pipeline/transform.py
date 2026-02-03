@@ -2,10 +2,32 @@
 
 from os import environ as ENV
 from time import sleep
+from datetime import datetime
 
 from dotenv import load_dotenv
 
 from extract import get_stomp_listener
+
+
+def get_corrected_types(message: dict) -> dict:
+    """Returns a dict which corrects the types of some values in the message."""
+
+    typed_message = message.copy()
+
+    typed_message["incident_start"] = datetime.fromisoformat(
+        message["incident_start"])
+
+    typed_message["incident_end"] = datetime.fromisoformat(
+        message["incident_end"])
+
+    if message["planned"].lower() == "true":
+        typed_message["planned"] = True
+    elif message["planned"].lower() == "false":
+        typed_message["planned"] = False
+    else:
+        typed_message["planned"] = None
+
+    return typed_message
 
 
 def get_filtered_message(message: dict) -> dict:
@@ -34,9 +56,13 @@ def get_transformed_message(message: dict) -> dict:
     """Returns the transformed message as a dict with relevant columns for the database.
     Cleans data values and applies formatting."""
 
-    message = get_filtered_message(message)
+    transformed_message = message.copy()
 
-    return message
+    transformed_message = get_filtered_message(message)
+
+    transformed_message = get_corrected_types(message)
+
+    return transformed_message
 
 
 if __name__ == "__main__":
