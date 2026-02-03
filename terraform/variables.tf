@@ -14,23 +14,20 @@ variable "CLUSTER_NAME" {
   type = string
 }
 
-variable "DB_HOST" {
+variable "S3_BUCKET_NAME" {
   type = string
 }
 
-variable "DB_NAME" {
+variable "ECS_IMAGE_URI" {
   type = string
 }
 
-variable "DB_USERNAME" {
-  type = string
-}
-
-variable "DB_PASSWORD" {
+variable "AWS_ACCESS_KEY_ID" {
   type      = string
   sensitive = true
 }
 
-variable "S3_BUCKET_NAME" {
-  type = string
+variable "AWS_SECRET_ACCESS_KEY" {
+  type      = string
+  sensitive = true
 }
