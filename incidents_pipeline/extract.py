@@ -20,6 +20,9 @@ basicConfig(level=INFO)
 
 class Listener(ConnectionListener):
 
+    def __init__(self):
+        self.messages = []
+
     def get_clean_message_dict(self, msg: str) -> str:
         """Cleans message contents according to discrepancies noted on API.
         Returns a corresponding dictionary."""
@@ -29,21 +32,23 @@ class Listener(ConnectionListener):
 
         return loads(sub(r"\/?ns[23]:", "", msg))
 
-    def extract_message_details(self, msg: str) -> dict:
-        pass
-
     def on_message(self, msg: Frame):
         """Whenever we receive a message, parse it as a dict and clean the key names."""
         try:
-            print(msg.headers)
-
-            data = self.get_clean_message_dict(dumps(parse(msg.body)))
-
-            with open("data.json", "w") as f:
-                dump(data, f, indent=4)
+            self.messages.append(
+                self.get_clean_message_dict(dumps(parse(msg.body))))
 
         except Exception as e:
             logger.error(str(e))
+
+    def pop_message(self) -> dict:
+        """Removes and returns the message first in the list of messages.
+        Returns None if list is empty."""
+
+        if len(self.messages) != 0:
+            return self.messages.pop(0)
+
+        return None
 
 
 def get_stomp_connection(config: _Environ) -> Connection12:
@@ -54,10 +59,11 @@ def get_stomp_connection(config: _Environ) -> Connection12:
         auto_decode=False)
 
 
-def connect_and_subscribe(config: _Environ, conn: Connection12) -> None:
-    """Subscribes the connection to the National Rail Real Time Incidents topic."""
+def connect_and_subscribe(config: _Environ, listener: Listener, conn: Connection12) -> None:
+    """Subscribes the connection to the National Rail Real Time Incidents topic.
+    Requires a STOMP listener and a connection."""
 
-    conn.set_listener("", Listener())
+    conn.set_listener("", listener)
 
     conn.connect(username=config["STOMP_USERNAME"],
                  passcode=config["STOMP_PASSWORD"],
@@ -74,7 +80,14 @@ if __name__ == "__main__":
 
     conn = get_stomp_connection(ENV)
 
-    connect_and_subscribe(ENV, conn)
+    listener = Listener()
+
+    connect_and_subscribe(ENV, listener, conn)
 
     while True:
+        message = listener.pop_message()
+
+        if message:
+            print(message)
+
         sleep(1)
