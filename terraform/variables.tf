@@ -1,40 +1,40 @@
-variable "aws_region" {
+variable "AWS_REGION" {
   type = string
 }
 
-variable "aws_account_id" {
+variable "AWS_ACCOUNT_ID" {
   type = string
 }
 
-variable "vpc_id" {
+variable "VPC_ID" {
   type = string
 }
 
-variable "cluster_name" {
+variable "CLUSTER_NAME" {
   type = string
 }
 
-variable "db_driver" {
+variable "DB_DRIVER" {
   type = string
 }
 
-variable "db_host" {
+variable "DB_HOST" {
   type = string
 }
 
-variable "db_name" {
+variable "DB_NAME" {
   type = string
 }
 
-variable "db_username" {
+variable "DB_USERNAME" {
   type = string
 }
 
-variable "db_password" {
+variable "DB_PASSWORD" {
   type      = string
   sensitive = true
 }
 
-variable "s3_bucket_name" {
+variable "S3_BUCKET_NAME" {
   type = string
 }

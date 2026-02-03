@@ -1,10 +1,10 @@
 ############### s3 Bucket ###################
 resource "aws_s3_bucket" "rail_tracker_archive_bucket" {
-  bucket        = var.s3_bucket_name
+  bucket = var.S3_BUCKET_NAME
   force_destroy = true
 
   tags = {
-    Name    = var.s3_bucket_name
+    Name    = var.S3_BUCKET_NAME
   }
 }
 
@@ -29,7 +29,7 @@ resource "aws_s3_bucket_policy" "rail_tracker_archive_bucket_policy" {
       Effect    = "Allow"
       Principal = "*"
       Action    = "s3:GetObject"
-      Resource  = ["arn:aws:s3:::${var.s3_bucket_name}/*"]
+      Resource = ["arn:aws:s3:::${var.S3_BUCKET_NAME}/*"]
     }]
   })
 
