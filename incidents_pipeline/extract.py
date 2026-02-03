@@ -74,15 +74,24 @@ def connect_and_subscribe(config: _Environ, listener: Listener, conn: Connection
                    ack="auto")
 
 
+def get_stomp_listener(config: _Environ) -> Listener:
+    """Returns a STOMP listener that is connected and subscribed
+    to National Rail Real Time Incidents Feed."""
+
+    conn = get_stomp_connection(config)
+
+    listener = Listener()
+
+    connect_and_subscribe(config, listener, conn)
+
+    return listener
+
+
 if __name__ == "__main__":
 
     load_dotenv()
 
-    conn = get_stomp_connection(ENV)
-
-    listener = Listener()
-
-    connect_and_subscribe(ENV, listener, conn)
+    listener = get_stomp_listener(ENV)
 
     while True:
         message = listener.pop_message()
