@@ -4,7 +4,7 @@ from os import environ as ENV, _Environ
 from socket import getfqdn
 from time import sleep
 from logging import getLogger, basicConfig, INFO
-from json import dumps, loads
+from json import dumps, loads, dump
 from re import sub
 
 from xmltodict import parse
@@ -37,8 +37,10 @@ class Listener(ConnectionListener):
         try:
             logger.info("Message received.")
 
-            self.messages.append(
-                self.get_clean_message_dict(dumps(parse(msg.body))))
+            data = self.get_clean_message_dict(dumps(parse(msg.body)))
+            data = data["PtIncident"]
+
+            self.messages.append(data)
 
         except Exception as e:
             logger.error(str(e))
@@ -51,7 +53,6 @@ class Listener(ConnectionListener):
             logger.info("Message popped.")
             return self.messages.pop(0)
 
-        logger.info("Message not popped, message list empty.")
         return None
 
 
