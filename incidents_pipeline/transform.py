@@ -38,8 +38,12 @@ def get_filtered_message(message: dict) -> dict:
 
     filtered_message["summary"] = message["Summary"]
 
-    filtered_message["operators"] = [op["OperatorName"]
-                                     for op in message["Affects"]["Operators"]["AffectedOperator"]]
+    if isinstance(message["Affects"]["Operators"]["AffectedOperator"], list):
+        filtered_message["operators"] = [op["OperatorName"]
+                                         for op in message["Affects"]["Operators"]["AffectedOperator"]]
+    else:
+        filtered_message["operators"] = [message["Affects"]
+                                         ["Operators"]["AffectedOperator"]["OperatorName"]]
 
     filtered_message["incident_start"] = message["ValidityPeriod"]["StartTime"]
 
@@ -56,11 +60,9 @@ def get_transformed_message(message: dict) -> dict:
     """Returns the transformed message as a dict with relevant columns for the database.
     Cleans data values and applies formatting."""
 
-    transformed_message = message.copy()
+    filtered_message = get_filtered_message(message.copy())
 
-    transformed_message = get_filtered_message(message)
-
-    transformed_message = get_corrected_types(message)
+    transformed_message = get_corrected_types(filtered_message)
 
     return transformed_message
 

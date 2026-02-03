@@ -2,7 +2,7 @@
 
 # pylint:skip-file
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from transform import get_filtered_message, get_corrected_types, get_transformed_message
 
@@ -56,3 +56,16 @@ def test_get_corrected_types_valid_values():
     assert actual_dict["incident_end"] == datetime.fromisoformat(
         test_dict["incident_end"])
     assert actual_dict["planned"] == True
+
+
+def test_get_transformed_message_contents(test_incident_message):
+    test_message = get_transformed_message(test_incident_message)
+
+    assert test_message == {
+        "summary": "Disruption between Arbroath and Aberdeen expected until 18:00",
+        "operators": ["LNER", "ScotRail"],
+        "incident_start": datetime(2026, 2, 3, 14, 5, tzinfo=timezone.utc),
+        "incident_end": datetime(2026, 2, 3, 18, 5, tzinfo=timezone.utc),
+        "url": "https://www.nationalrail.co.uk/service-disruptions/arbroath-20260203/",
+        "planned": True
+    }
