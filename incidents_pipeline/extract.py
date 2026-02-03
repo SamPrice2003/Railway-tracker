@@ -4,7 +4,7 @@ from os import environ as ENV, _Environ
 from socket import getfqdn
 from time import sleep
 from logging import getLogger, basicConfig, INFO
-from json import dumps, dump, loads
+from json import dumps, loads
 from re import sub
 
 from xmltodict import parse
