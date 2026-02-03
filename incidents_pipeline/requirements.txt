@@ -1,0 +1,3 @@
+python-dotenv
+stomp.py
+xmltodict
