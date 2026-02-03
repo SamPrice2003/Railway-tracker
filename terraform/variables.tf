@@ -14,10 +14,6 @@ variable "CLUSTER_NAME" {
   type = string
 }
 
-variable "DB_DRIVER" {
-  type = string
-}
-
 variable "DB_HOST" {
   type = string
 }
