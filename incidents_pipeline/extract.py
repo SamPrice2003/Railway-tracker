@@ -47,6 +47,7 @@ class Listener(ConnectionListener):
         Returns None if list is empty."""
 
         if len(self.messages) != 0:
+            logger.info("Message popped.")
             return self.messages.pop(0)
 
         return None
