@@ -35,6 +35,8 @@ class Listener(ConnectionListener):
     def on_message(self, msg: Frame):
         """Whenever we receive a message, parse it as a dict and clean the key names."""
         try:
+            logger.info("Message received.")
+
             self.messages.append(
                 self.get_clean_message_dict(dumps(parse(msg.body))))
 
@@ -46,8 +48,10 @@ class Listener(ConnectionListener):
         Returns None if list is empty."""
 
         if len(self.messages) != 0:
+            logger.info("Message popped.")
             return self.messages.pop(0)
 
+        logger.info("Message not popped, message list empty.")
         return None
 
 
