@@ -32,8 +32,12 @@ class Listener(ConnectionListener):
     def on_message(self, msg: Frame):
         """Whenever we receive a message, parse it as a dict and clean the key names."""
         try:
-            self.messages.append(
-                self.get_clean_message_dict(dumps(parse(msg.body))))
+            logger.info("Message received.")
+
+            data = self.get_clean_message_dict(dumps(parse(msg.body)))
+            data = data["PtIncident"]
+
+            self.messages.append(data)
 
         except Exception as e:
             logger.error(str(e))
