@@ -1,7 +1,6 @@
 "Script which extracts incident feed data from the National Rail API."
 
 from os import environ as ENV, _Environ
-from socket import getfqdn
 from time import sleep
 from logging import getLogger, basicConfig, INFO
 from json import dumps, loads
@@ -11,8 +10,6 @@ from xmltodict import parse
 from dotenv import load_dotenv
 from stomp import Connection12, ConnectionListener
 from stomp.utils import Frame
-
-CLIENT_ID = getfqdn()
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
