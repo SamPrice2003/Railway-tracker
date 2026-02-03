@@ -75,6 +75,7 @@ if __name__ == "__main__":
         message = listener.pop_message()
 
         if message:
+            message = get_transformed_message(message)
             print(message)
 
         sleep(1)

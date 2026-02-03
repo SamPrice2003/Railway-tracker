@@ -1,8 +1,10 @@
 """Script for testing transform.py"""
 
+# pylint:skip-file
+
 from datetime import datetime
 
-from transform import get_filtered_message, get_corrected_types
+from transform import get_filtered_message, get_corrected_types, get_transformed_message
 
 
 def test_get_filtered_message_valid_columns(test_incident_message):
@@ -27,7 +29,6 @@ def test_get_filtered_message_valid_values(test_incident_message):
 
 
 def test_get_corrected_types_valid_types():
-
     test_dict = {
         "incident_start": "2026-02-03T14:05:00.000Z",
         "incident_end": "2026-02-03T18:05:00.000Z",
@@ -42,7 +43,6 @@ def test_get_corrected_types_valid_types():
 
 
 def test_get_corrected_types_valid_values():
-
     test_dict = {
         "incident_start": "2026-02-03T14:05:00.000Z",
         "incident_end": "2026-02-03T18:05:00.000Z",
