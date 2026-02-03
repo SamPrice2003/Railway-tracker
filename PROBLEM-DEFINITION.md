@@ -67,6 +67,7 @@ The goal is to provide timely, targeted information rather than constant, low-va
 
 The project will use:
 - National Rail APIs (Darwin feed)
+- The Realtime Trains API (RTT)
 
 These data sources present several constraints:
 - Data is event-based rather than relational
