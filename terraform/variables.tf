@@ -69,3 +69,11 @@ variable "AWS_SECRET_ACCESS_KEY" {
   type      = string
   sensitive = true
 }
+
+variable "METRICS_LAMBDA_IMAGE_URI" {
+  type = string
+}
+
+variable "REPORTS_LAMBDA_IMAGE_URI" {
+  type = string
+}
