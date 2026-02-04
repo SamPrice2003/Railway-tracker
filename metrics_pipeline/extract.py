@@ -34,11 +34,15 @@ def get_crs(station_name: str) -> str:
         if station_name.title() in station["name"]:
             crs_matches.append(station["crs"])
 
-    if len(crs_matches) != 1:
+    if len(crs_matches) == 1:
+        return crs_matches[0]
+    if len(crs_matches) > 1:
         raise ValueError(
             f"'{station_name.title()}' matches with more than 1 station: {crs_matches}")
-
-    return crs_matches[0]
+    if len(crs_matches) == 0:
+        raise ValueError(
+            f"'{station_name.title()}' does not match any existing station"
+        )
 
 
 def get_station_data(session: requests.Session,
@@ -50,7 +54,6 @@ def get_station_data(session: requests.Session,
     if user_crs:
         rtt_url = f"https://api.rtt.io/api/v1/json/search/{user_crs}"
 
-        # response = requests.get(url=rtt_url, auth=authorisation)
         response = session.get(url=rtt_url).json()
 
         return response
@@ -64,7 +67,6 @@ def get_station_data(session: requests.Session,
 
     rtt_url = f"https://api.rtt.io/api/v1/json/search/{crs}"
 
-    # response = requests.get(url=rtt_url, auth=authorisation)
     response = session.get(url=rtt_url).json()
 
     return response
@@ -100,29 +102,29 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
     """Returns a list of dictionaries containing
           the arrival details from all stops on that service."""
 
-    year = datetime.now().year
-    month = datetime.now().month
-    day = datetime.now().day
-
-    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}\{year}/{month:02d}/{day:02d}"
+    today = datetime.now().year
+    
+    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}\{today.year}/{today.month:02d}/{today.day:02d}"
 
     response = session.get(url=rtt_url).json()
 
     service_arrival_details = []
 
-    rundate = response["runDate"]
+    arrival_date = response["runDate"]
 
     for arrival in response["locations"]:
         arrival_dict = {}
+        booked_arrival = arrival.get("gbttBookedArrival")
+        actual_arrival = arrival.get("realtimeArrival")
         arrival_dict["crs"] = arrival["crs"]
-        if arrival.get("gbttBookedArrival"):
+        if booked_arrival:
             arrival_dict["scheduled_arr_time"] = datetime.strptime(
-                (rundate + arrival.get("gbttBookedArrival")), "%Y-%m-%d%H%M")
+                (arrival_date + booked_arrival), "%Y-%m-%d%H%M")
         else:
             arrival_dict["scheduled_arr_time"] = None
-        if arrival.get("realtimeArrival"):
+        if actual_arrival:
             arrival_dict["actual_arr_time"] = datetime.strptime(
-                (rundate + arrival.get("realtimeArrival")), "%Y-%m-%d%H%M")
+                (arrival_date + actual_arrival), "%Y-%m-%d%H%M")
         else:
             arrival_dict["actual_arr_time"] = None
         arrival_dict["platform_changed"] = arrival.get("platformChanged")
@@ -133,30 +135,18 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
     return service_arrival_details
 
 
-def remove_duplicates(data: list[dict]) -> list[dict]:
-    """Removes all duplicate entries from a list of dictionaries."""
-
-    for d in data:
-        while data.count(d) > 1:
-            data.remove(d)
-
-    return data
-
-
 def extract(config: _Environ, station_crs_list: list[str]) -> dict:
     """Extracts the data from the services."""
 
     basicConfig(level=INFO)
 
     # get basic authentication for API
-    basic = get_basic_auth(ENV)
+    basic_auth = get_basic_auth(ENV)
 
-    # get the session used
     session = requests.Session()
-    session.auth = basic
+    session.auth = basic_auth
     logger.info("Initialised session")
 
-    # initialise empty service details list
     service_details_list = []
 
     # get the service details for each station we are looking at
@@ -168,10 +158,9 @@ def extract(config: _Environ, station_crs_list: list[str]) -> dict:
 
     # remove any duplicate services which may have gone through
     # multiple of the stations we specified
-    service_details_list = remove_duplicates(service_details_list)
+    service_details_list = list(set(service_details_list))
     logger.info("Removed duplicate services")
 
-    # initialise arrivals list information
     arrival_details_list = []
 
     # get the arrival details for each location each service visits
