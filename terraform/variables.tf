@@ -37,14 +37,14 @@ variable "DASHBOARD_PORT" {
   default = 8501
 }
 
-# Database
+
 variable "DB_HOST" {
   type = string
 }
 
 variable "DB_PORT" {
-  type    = number
-  default = 5432
+  type    = string
+  default = "5432"
 }
 
 variable "DB_NAME" {
@@ -56,6 +56,16 @@ variable "DB_USERNAME" {
 }
 
 variable "DB_PASSWORD" {
+  type      = string
+  sensitive = true
+}
+
+variable "AWS_ACCESS_KEY_ID" {
+  type      = string
+  sensitive = true
+}
+
+variable "AWS_SECRET_ACCESS_KEY" {
   type      = string
   sensitive = true
 }

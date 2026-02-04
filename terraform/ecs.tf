@@ -102,7 +102,7 @@ resource "aws_ecs_task_definition" "railway-listener-task" {
         { name = "S3_BUCKET",  value = var.S3_BUCKET_NAME },
 
         { name = "DB_HOST", value = var.DB_HOST },
-        { name = "DB_PORT", value = tostring(var.DB_PORT) },
+        { name = "DB_PORT", value = var.DB_PORT },
         { name = "DB_NAME", value = var.DB_NAME },
 
         { name = "DB_USERNAME", value = var.DB_USERNAME },
@@ -181,7 +181,7 @@ resource "aws_ecs_task_definition" "railway-dashboard-task" {
         { name = "S3_BUCKET",  value = var.S3_BUCKET_NAME },
 
         { name = "DB_HOST", value = var.DB_HOST },
-        { name = "DB_PORT", value = tostring(var.DB_PORT) },
+        { name = "DB_PORT", value = var.DB_PORT },
         { name = "DB_NAME", value = var.DB_NAME },
 
         { name = "DB_USERNAME", value = var.DB_USERNAME },
