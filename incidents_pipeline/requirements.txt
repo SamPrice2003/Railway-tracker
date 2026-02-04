@@ -3,3 +3,4 @@ stomp.py
 xmltodict
 pytest
 pylint
+psycopg2
