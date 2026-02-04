@@ -62,4 +62,7 @@ CREATE TABLE incident_assignment (
 );
 
 
+\copy station(station_name, station_crs) from './crs.csv' WITH DELIMITER ',' CSV HEADER;
+        
+\copy operator (operator_name, url) from './operators.csv' WITH DELIMITER ',' CSV HEADER;
 
