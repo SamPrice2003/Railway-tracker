@@ -17,7 +17,7 @@ CREATE TABLE station (
 CREATE TABLE operator (
     operator_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     operator_name VARCHAR UNIQUE NOT NULL,
-    description VARCHAR
+    url VARCHAR
 );
 
 CREATE TABLE service (
