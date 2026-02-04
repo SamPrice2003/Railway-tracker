@@ -89,6 +89,7 @@ def get_service_details(session: requests.Session,
         service_dict["origin_station"] = service["locationDetail"]["origin"][0]["description"]
         service_dict["destination_station"] = \
             service["locationDetail"]["destination"][0]["description"]
+        service_dict["operator_name"] = service["atocName"]
 
         service_list.append(service_dict)
 
