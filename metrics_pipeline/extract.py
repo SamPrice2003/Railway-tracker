@@ -156,8 +156,6 @@ def extract(config: _Environ, station_crs_list: list[str]) -> dict:
             station_crs=crs, session=session))
         logger.info(f"Retrieved service details for {crs}")
 
-    # remove any duplicate services which may have gone through
-    # multiple of the stations we specified
     service_details_list = list(set(service_details_list))
     logger.info("Removed duplicate services")
 
