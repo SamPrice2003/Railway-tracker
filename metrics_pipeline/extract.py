@@ -155,10 +155,49 @@ def remove_duplicates(data: list[dict]) -> list[dict]:
     return data
 
 
-def extract_service_data(config: _Environ, station_crs_list: list[str]) -> list[dict]:
+def extract(config: _Environ, station_crs_list: list[str]) -> dict:
     """extracts the data from the services"""
 
-    basic = get_basic_auth()
+    basicConfig(level=INFO)
+
+    # get basic authentication for API
+    basic = get_basic_auth(ENV)
+
+    # get the session used
+    session = get_session(auth=basic)
+    logger.info("Initialised session")
+
+    # initialise empty service details list
+    service_details_list = []
+
+    # get the service details for each station we are looking at
+    # this contains the list of every service that passes through each of our stations
+    for crs in station_crs_list:
+        service_details_list.extend(get_service_details(
+            station_crs=crs, session=session))
+        logger.info(f"Retrieved service details for {crs}")
+
+    # remove any duplicate services which may have gone through
+    # multiple of the stations we specified
+    service_details_list = remove_duplicates(service_details_list)
+    logger.info("Removed duplicate services")
+
+    # initialise arrivals list information
+    arrival_details_list = []
+
+    # get the arrival details for each location each service visits
+    for service in service_details_list:
+        arrival_details_list.extend(get_service_arrival_details(
+            session=session, service=service))
+    logger.info("Retrieved arrival details for the services")
+
+    session.close()
+    logger.info("Closed session")
+
+    return {
+        "services": service_details_list,
+        "arrivals": arrival_details_list
+    }
 
 
 if __name__ == "__main__":
@@ -166,26 +205,6 @@ if __name__ == "__main__":
     # load environment variables
     load_dotenv()
 
-    # get basic auth
-    basic = get_basic_auth(ENV)
-
-    # define station list to look at
     CHOSEN_STATIONS = ["LBG", "STP", "KGX", "SHF", "LST"]
 
-    # define service uid set
-    SERVICE_DETAILS_LIST = []
-
-    # get the big set of service uids with their origin stations etc that each station we've chosen is connected to.
-    for station_crs in CHOSEN_STATIONS:
-        SERVICE_DETAILS_LIST.extend(get_service_details(
-            station_crs=station_crs, authorisation=basic))
-
-    # now remove duplicates in the service details list
-    SERVICE_DETAILS_LIST = remove_duplicates(SERVICE_DETAILS_LIST)
-
-    # next we need to get the new details from each of the service with a new api call per service in the list
-    SERVICE_ARRIVAL_DETAILS_LIST = []
-
-    for service in SERVICE_DETAILS_LIST:
-        SERVICE_ARRIVAL_DETAILS_LIST.extend(
-            get_service_arrival_details(authorisation=basic, service=service))
+    DATA = extract(ENV, CHOSEN_STATIONS)
