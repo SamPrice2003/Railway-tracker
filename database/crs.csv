@@ -41,7 +41,6 @@ Alderley Edge Rail Station,ALD
 Aldermaston Rail Station,AMT
 Aldershot Rail Station,AHT
 Aldrington Rail Station,AGT
-Liverpool South Parkway Rail Station,LPY
 Alexandra Palace Rail Station,AAP
 Alfreton Rail Station,ALF
 Allens West Rail Station,ALW
@@ -1118,6 +1117,8 @@ Highbridge & Burnham-on-Sea Rail Station,HIG
 Highbury & Islington Rail Station,HHY
 Highams Park Rail Station,HIP
 Heighington Rail Station,HEI
+Highbury & Islington Rail Station,HII
+Higham Rail Station,HGM
 Hillside Rail Station,HIL
 Hilsea Rail Station,HLS
 Hinckley Rail Station,HNK
@@ -1480,6 +1481,7 @@ Livingston South Rail Station,LVG
 Liverpool Central Rail Station,LVC
 Liverpool Lime Street Rail Station,LIV
 Liverpool Lime Street Low Level Rail Station,LVL
+Liverpool South Parkway Rail Station,LPY
 Langwathby Rail Station,LGW
 Lydney Rail Station,LYD
 Lye (West Midlands) Rail Station,LYE
@@ -1753,7 +1755,6 @@ Peterborough Rail Station,PBO
 Pemberton Rail Station,PEM
 Portchester Rail Station,PTC
 Queens Road Peckham Rail Station,QRP
-Peckham Rye Rail Station,PMR
 Peartree Rail Station,PEA
 Pegswood Rail Station,PEG
 Pembroke Dock Rail Station,PMD
@@ -1777,6 +1778,7 @@ Priesthill & Darnley Rail Station,PTL
 Pilning Rail Station,PIL
 Pinhoe Rail Station,PIN
 Pitsea Rail Station,PSE
+Peckham Rye Rail Station,PMR
 Park Street Rail Station,PKT
 Paddock Wood Rail Station,PDW
 Pollokshields East Rail Station,PLE
@@ -1895,6 +1897,7 @@ Redditch Rail Station,RDC
 Radley Rail Station,RAD
 Riddlesdown Rail Station,RDD
 Reading Rail Station,RDG
+Reading Rail Station,RBU
 Redbridge (Hants) Rail Station,RDB
 Redcar Central Rail Station,RCC
 Redcar East Rail Station,RCE
@@ -2387,8 +2390,8 @@ Warwick Rail Station,WRW
 Warwick Parkway Rail Station,WRP
 Waterbeach Rail Station,WBC
 Watford High Street Rail Station,WFH
-Watford Junction Rail Station,WFJ
 Watford North Rail Station,WFN
+Watford Junction Rail Station,WFJ
 Watlington Rail Station,WTG
 Watton-at-Stone Rail Station,WAS
 London Waterloo Rail Station,WAT
@@ -2411,7 +2414,6 @@ Woodlesford Rail Station,WDS
 Woodmansterne Rail Station,WME
 Wood End Rail Station,WDE
 Widney Manor Rail Station,WMR
-Wimbledon Rail Station,WIM
 Widdrington Rail Station,WDD
 West Drayton Rail Station,WDT
 Wood Street Rail Station,WST
@@ -2470,6 +2472,7 @@ Wigton Rail Station,WGT
 Wickford Rail Station,WIC
 Wilmcote Rail Station,WMC
 Wilnecote (Staffs) Rail Station,WNE
+Wimbledon Rail Station,WIM
 Wimbledon Chase Rail Station,WBO
 Winchelsea Rail Station,WSE
 Windsor & Eton Central Rail Station,WNC

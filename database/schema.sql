@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS station;
 
 CREATE TABLE station (
     station_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    station_name VARCHAR UNIQUE NOT NULL,
+    station_name VARCHAR NOT NULL,
     station_crs VARCHAR UNIQUE NOT NULL
 );
 
