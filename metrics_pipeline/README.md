@@ -1,13 +1,3 @@
-
-
-Lowkenuinely todo list
-
-- Make a list of stations we want to get the services for
-- Iterate over this list and collect the service UID for each service passing through the station (probs 50-100 per station depending on size)
-- Use this new list of service UIDs to get the relevant info for the arrivals for the database and let them be accessible by the transform script
-- We have the stations in the UK with their crs already. Eventually need to seed this data in the database.
-
-
 - Relevant info for the database:
 
   - STATION

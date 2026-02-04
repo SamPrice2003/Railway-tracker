@@ -1,27 +1,20 @@
 """ The extract script responsible for extracting static data from the RTT api """
 
-# imports
-import pandas as pd
+from os import environ as ENV, _Environ
+import json
+from logging import getLogger, basicConfig, INFO
+from datetime import datetime
 
 import requests
 from requests.auth import HTTPBasicAuth
-
-from os import environ as ENV, _Environ, path
 from dotenv import load_dotenv
 
-import json
-
-from logging import getLogger, basicConfig, INFO
-
-from datetime import datetime
 
 logger = getLogger(__name__)
 
-# set up basic auth with credentials
-
 
 def get_basic_auth(config: _Environ):
-    """returns a basic auth from credentials"""
+    """Returns a basic auth from credentials."""
 
     basic = HTTPBasicAuth(
         username=ENV["RTT_USER"], password=ENV["RTT_PASSWORD"])
@@ -29,20 +22,10 @@ def get_basic_auth(config: _Environ):
     return basic
 
 
-def get_session(auth: HTTPBasicAuth) -> requests.Session:
-    """returns a session to make api calls faster"""
-
-    session = requests.Session()
-
-    session.auth = auth
-
-    return session
-
-
 def get_crs(station_name: str) -> str:
-    """returns the crs of the station from the name"""
+    """Returns the crs of the station from the name."""
 
-    with open("crs.json", "r") as f:
+    with open("crs.json", "r", encoding="utf-8") as f:
         crs_data = json.load(f)
 
     crs_matches = []
@@ -58,8 +41,10 @@ def get_crs(station_name: str) -> str:
     return crs_matches[0]
 
 
-def get_station_data(session: requests.Session, station_name: str = None, user_crs: str = None) -> dict:
-    """returns the data from the station provided"""
+def get_station_data(session: requests.Session,
+                     station_name: str = None,
+                     user_crs: str = None) -> dict:
+    """Returns the data from the station provided."""
 
     # if the user provided a crs they know
     if user_crs:
@@ -71,26 +56,27 @@ def get_station_data(session: requests.Session, station_name: str = None, user_c
         return response
 
     # instead get the crs from the user known station name
-    else:
-        if station_name is None:
-            raise TypeError("Cannot leave both crs and station name empty")
+    
+    if station_name is None:
+        raise TypeError("Cannot leave both crs and station name empty.")
 
-        crs = get_crs(station_name)
+    crs = get_crs(station_name)
 
-        rtt_url = f"https://api.rtt.io/api/v1/json/search/{crs}"
+    rtt_url = f"https://api.rtt.io/api/v1/json/search/{crs}"
 
-        # response = requests.get(url=rtt_url, auth=authorisation)
-        response = session.get(url=rtt_url).json()
+    # response = requests.get(url=rtt_url, auth=authorisation)
+    response = session.get(url=rtt_url).json()
 
-        return response
+    return response
 
 
-def get_service_details(session: requests.Session, station_crs: str) -> list[str]:
-    """returns a list of service uids with their origins/destinations from services passing through a given station"""
+def get_service_details(session: requests.Session,
+                        station_crs: str) -> list[str]:
+    """Returns a list of service uids with their origins/destinations
+       from services passing through a given station."""
 
     rtt_url = f"https://api.rtt.io/api/v1/json/search/{station_crs}"
 
-    # response = requests.get(url=rtt_url, auth=authorisation).json()
     response = session.get(url=rtt_url).json()
 
     service_list = []
@@ -101,7 +87,8 @@ def get_service_details(session: requests.Session, station_crs: str) -> list[str
 
         service_dict["service_uid"] = service["serviceUid"]
         service_dict["origin_station"] = service["locationDetail"]["origin"][0]["description"]
-        service_dict["destination_station"] = service["locationDetail"]["destination"][0]["description"]
+        service_dict["destination_station"] = \
+            service["locationDetail"]["destination"][0]["description"]
 
         service_list.append(service_dict)
 
@@ -109,15 +96,15 @@ def get_service_details(session: requests.Session, station_crs: str) -> list[str
 
 
 def get_service_arrival_details(session: requests.Session, service: dict) -> list[dict]:
-    """returns a list of dictionaries containing the arrival details from all stops on that service"""
+    """Returns a list of dictionaries containing
+          the arrival details from all stops on that service."""
 
     year = datetime.now().year
     month = datetime.now().month
     day = datetime.now().day
 
-    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}/{year}/{month:02d}/{day:02d}"
+    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}\{year}/{month:02d}/{day:02d}"
 
-    # response = requests.get(url=rtt_url, auth=authorisation).json()
     response = session.get(url=rtt_url).json()
 
     service_arrival_details = []
@@ -146,7 +133,7 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
 
 
 def remove_duplicates(data: list[dict]) -> list[dict]:
-    """removes all duplicate entries from a list of dictionaries"""
+    """Removes all duplicate entries from a list of dictionaries."""
 
     for d in data:
         while data.count(d) > 1:
@@ -156,7 +143,7 @@ def remove_duplicates(data: list[dict]) -> list[dict]:
 
 
 def extract(config: _Environ, station_crs_list: list[str]) -> dict:
-    """extracts the data from the services"""
+    """Extracts the data from the services."""
 
     basicConfig(level=INFO)
 
@@ -164,7 +151,8 @@ def extract(config: _Environ, station_crs_list: list[str]) -> dict:
     basic = get_basic_auth(ENV)
 
     # get the session used
-    session = get_session(auth=basic)
+    session = requests.Session()
+    session.auth = basic
     logger.info("Initialised session")
 
     # initialise empty service details list
@@ -202,9 +190,8 @@ def extract(config: _Environ, station_crs_list: list[str]) -> dict:
 
 if __name__ == "__main__":
 
-    # load environment variables
     load_dotenv()
 
-    CHOSEN_STATIONS = ["LBG", "STP", "KGX", "SHF", "LST"]
+    chosen_stations = ["LBG", "STP", "KGX", "SHF", "LST"]
 
-    DATA = extract(ENV, CHOSEN_STATIONS)
+    DATA = extract(ENV, chosen_stations)
