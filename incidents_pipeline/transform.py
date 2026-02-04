@@ -9,6 +9,13 @@ from dotenv import load_dotenv
 from extract import get_stomp_listener
 
 
+def get_services_affected(services_str: str) -> list[dict]:
+    """Returns the services affected by the incident, each dict comprises
+    of an origin station key and destination station key for the service."""
+
+    pass
+
+
 def get_corrected_types(message: dict) -> dict:
     """Returns a dict which corrects the types of some values in the message."""
 
@@ -32,7 +39,7 @@ def get_corrected_types(message: dict) -> dict:
 
 def get_filtered_message(message: dict) -> dict:
     """Returns a message with only useful information on incidents for the database.
-    This includes summary, operator, start time, end time, url, whether it was planned."""
+    This includes summary, operator, start time, end time, url, whether it was planned, services affected."""
 
     filtered_message = {}
 
@@ -52,6 +59,9 @@ def get_filtered_message(message: dict) -> dict:
     filtered_message["url"] = message["InfoLinks"]["InfoLink"]["Uri"]
 
     filtered_message["planned"] = message["Planned"]
+
+    filtered_message["services_affected"] = get_services_affected(
+        message["Affects"]["RoutesAffected"])
 
     return filtered_message
 

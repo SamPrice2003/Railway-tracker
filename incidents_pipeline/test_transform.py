@@ -4,7 +4,7 @@
 
 from datetime import datetime, timezone
 
-from transform import get_filtered_message, get_corrected_types, get_transformed_message
+from transform import get_filtered_message, get_corrected_types, get_transformed_message, get_services_affected
 
 
 def test_get_filtered_message_valid_columns(test_incident_message):
@@ -69,3 +69,38 @@ def test_get_transformed_message_contents(test_incident_message):
         "url": "https://www.nationalrail.co.uk/service-disruptions/arbroath-20260203/",
         "planned": True
     }
+
+
+def test_get_services_affected_simple(test_incident_message):
+    services_affected = get_services_affected(
+        test_incident_message["Affects"]["RoutesAffected"])
+
+    assert services_affected == [
+        {
+            "origin_station": "London Victoria",
+            "destination_station": "East Grinstead"
+        }
+    ]
+
+
+def test_get_services_affected_complex(test_incident_message):
+    services_affected = "<p>LNER between London Kings Cross / York and Aberdeen</p><p>ScotRail between Glasgow Queen Street / Edinburgh and Aberdeen, between Glasgow Queen Street and Inverness, and also between Dundee and Arbroath</p>"
+
+    assert services_affected == [
+        {
+            "origin_station": "London Kings Cross",
+            "destination_station": "Aberdeen"
+        },
+        {
+            "origin_station": "Glasgow Queen Street",
+            "destination_station": "Aberdeen"
+        },
+        {
+            "origin_station": "Glasgow Queen Street",
+            "destination_station": "Inverness"
+        },
+        {
+            "origin_station": "Dundee",
+            "destination_station": "Arbroath"
+        }
+    ]
