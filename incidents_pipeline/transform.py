@@ -3,6 +3,7 @@
 from os import environ as ENV
 from time import sleep
 from datetime import datetime
+from re import sub, split
 
 from dotenv import load_dotenv
 
@@ -13,7 +14,23 @@ def get_services_affected(services_str: str) -> list[dict]:
     """Returns the services affected by the incident, each dict comprises
     of an origin station key and destination station key for the service."""
 
-    pass
+    services_str = sub(r"^<p>", "", services_str)
+    services_str = sub(r"<\/p>$", "", services_str)
+
+    services_lst = split(r"<\/p><p>|,", services_str)
+
+    services_lst = [sub(r".*[bB]etween ", "", service)
+                    for service in services_lst]
+
+    services_lst = [sub(r" \/ .+ and|and .+ / |and", ",", service)
+                    for service in services_lst]
+
+    services_lst = [service.split(",") for service in services_lst]
+
+    services_lst = [{"origin_station": service[0].strip(),
+                     "destination_station": service[-1].strip()} for service in services_lst]
+
+    return services_lst
 
 
 def get_corrected_types(message: dict) -> dict:

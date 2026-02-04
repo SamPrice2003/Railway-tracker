@@ -11,7 +11,7 @@ def test_get_filtered_message_valid_columns(test_incident_message):
     filtered_message = get_filtered_message(test_incident_message)
 
     expected_columns = set(["summary", "operators",
-                           "incident_start", "incident_end", "url", "planned"])
+                           "incident_start", "incident_end", "url", "planned", "services_affected"])
     actual_columns = set(filtered_message.keys())
 
     assert expected_columns == actual_columns
@@ -67,13 +67,31 @@ def test_get_transformed_message_contents(test_incident_message):
         "incident_start": datetime(2026, 2, 3, 14, 5, tzinfo=timezone.utc),
         "incident_end": datetime(2026, 2, 3, 18, 5, tzinfo=timezone.utc),
         "url": "https://www.nationalrail.co.uk/service-disruptions/arbroath-20260203/",
-        "planned": True
+        "planned": True,
+        "services_affected": [
+            {
+                "origin_station": "London Kings Cross",
+                "destination_station": "Aberdeen"
+            },
+            {
+                "origin_station": "Glasgow Queen Street",
+                "destination_station": "Aberdeen"
+            },
+            {
+                "origin_station": "Glasgow Queen Street",
+                "destination_station": "Inverness"
+            },
+            {
+                "origin_station": "Dundee",
+                "destination_station": "Arbroath"
+            }
+        ]
     }
 
 
-def test_get_services_affected_simple(test_incident_message):
+def test_get_services_affected_simple():
     services_affected = get_services_affected(
-        test_incident_message["Affects"]["RoutesAffected"])
+        "<p>Between London Victoria and Oxted / East Grinstead</p>")
 
     assert services_affected == [
         {
@@ -84,7 +102,8 @@ def test_get_services_affected_simple(test_incident_message):
 
 
 def test_get_services_affected_complex(test_incident_message):
-    services_affected = "<p>LNER between London Kings Cross / York and Aberdeen</p><p>ScotRail between Glasgow Queen Street / Edinburgh and Aberdeen, between Glasgow Queen Street and Inverness, and also between Dundee and Arbroath</p>"
+    services_affected = get_services_affected(
+        test_incident_message["Affects"]["RoutesAffected"])
 
     assert services_affected == [
         {
