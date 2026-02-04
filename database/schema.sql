@@ -1,27 +1,35 @@
--- schema for the postgres db
+-- Schema for the PostgreSQL database on AWS RDS
 
--- create tables
+DROP TABLE IF EXISTS incident_assignment;
+DROP TABLE IF EXISTS incident;
+DROP TABLE IF EXISTS arrival;
+DROP TABLE IF EXISTS service;
+DROP TABLE IF EXISTS operator;
+DROP TABLE IF EXISTS station;
+
 
 CREATE TABLE station (
     station_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     station_name VARCHAR UNIQUE NOT NULL,
     station_crs VARCHAR UNIQUE NOT NULL
-)
+);
 
 CREATE TABLE operator (
     operator_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     operator_name VARCHAR UNIQUE NOT NULL,
     description VARCHAR
-)
+);
 
 CREATE TABLE service (
     service_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     service_uid VARCHAR(6) UNIQUE NOT NULL,
     origin_station_id INT NOT NULL,
     destination_station_id INT NOT NULL,
+    operator_id INT NOT NULL,
     FOREIGN KEY (origin_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
-    FOREIGN KEY (destination_station_id) REFERENCES station(station_id) ON DELETE CASCADE
-)
+    FOREIGN KEY (destination_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
+    FOREIGN KEY (operator_id) REFERENCES operator(operator_id) ON DELETE CASCADE
+);
 
 CREATE TABLE arrival (
     arrival_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -32,10 +40,10 @@ CREATE TABLE arrival (
     service_id INT NOT NULL,
     FOREIGN KEY (arrival_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE incident (
-    incident_id INT GENERATED ALWAYS AS IDENTITY,
+    incident_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     summary TEXT,
     incident_start TIMESTAMP NOT NULL,
     incident_end TIMESTAMP,
@@ -43,7 +51,7 @@ CREATE TABLE incident (
     planned BOOLEAN NOT NULL,
     service_id INT NOT NULL,
     FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE incident_assignment (
     incident_assignment_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -51,7 +59,7 @@ CREATE TABLE incident_assignment (
     operator_id INT NOT NULL,
     FOREIGN KEY (incident_id) REFERENCES incident(incident_id) ON DELETE CASCADE,
     FOREIGN KEY (operator_id) REFERENCES operator(operator_id) ON DELETE CASCADE
-)
+);
 
 
 
