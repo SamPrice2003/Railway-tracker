@@ -12,6 +12,11 @@ STOMP_PORT=61613
 STOMP_USERNAME=XXXX
 STOMP_PASSWORD=XXXX
 STOMP_TOPIC=XXXX
+DB_HOST=XXXX
+DB_PORT=XXXX
+DB_NAME=XXXX
+DB_USERNAME=XXXX
+DB_PASSWORD=XXXX
 ```
 
 The STOMP information can be found via registering for the [National Rail Data Portal](https://opendata.nationalrail.co.uk/feeds). It is located under the title "Knowledgebase (KB) Real Time Incidents".
