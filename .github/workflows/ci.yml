@@ -2,7 +2,10 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "**/*.py"
   workflow_dispatch:
+
 
 jobs:
   hello_world:
