@@ -14,9 +14,6 @@ variable "VPC_ID" {
   type = string
 }
 
-variable "PUBLIC_SUBNET_IDS" {
-  type = list(string)
-}
 
 variable "S3_BUCKET_NAME" {
   type = string
