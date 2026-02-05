@@ -800,7 +800,7 @@ Edenbridge Town,51.200287,0.06689,EBT
 Edge Hill,53.402663,-2.946986,EDG
 Edinburgh Gateway,55.941,-3.32,EGY
 Edinburgh Park,55.927615,-3.307829,EDP
-Edinburgh Waverley,55.952442,-3.188236,EDB
+Edinburgh,55.952442,-3.188236,EDB
 Edmonton Green,51.623802,-0.059665,EDR
 Effingham Junction,51.291504,-0.419536,EFF
 Eggesford,50.887848,-3.875235,EGG
@@ -1115,8 +1115,8 @@ Heald Green,53.369248,-2.236533,HDG
 Healing,53.581425,-0.160163,HLI
 Heath High Level,51.516518,-3.181737,HHL
 Heath Low Level,51.515606,-3.183163,HLL
-Heathrow Terminal 4 Rail,51.458214,-0.445447,HAF
-Heathrow Terminal 5 Rail,51.47,-0.48,HWV
+Heathrow Airport Terminal 4,51.458214,-0.445447,HAF
+Heathrow Airport Terminal 5,51.47,-0.48,HWV
 Heathrow Terminals 1-2-3 Rail,51.471,-0.456,HXX
 Heaton Chapel,53.425556,-2.179046,HTC
 Hebden Bridge,53.737587,-2.009063,HBD
@@ -1382,7 +1382,7 @@ Lelant Saltings,50.17923,-5.441468,LTS
 Lenham,51.233986,0.707337,LEN
 Lenzie,55.921364,-4.153932,LNZ
 Leominster,52.225109,-2.730506,LEO
-Letchworth Garden City,51.980305,-0.229403,LET
+Letchworth,51.980305,-0.229403,LET
 Leuchars,56.375427,-2.893734,LEU
 Leven,56.1923,-3.002,LEV
 Levenshulme,53.444405,-2.192676,LVM
@@ -1466,7 +1466,7 @@ London Marylebone,51.52248,-0.163605,MYB
 London Paddington,51.516014,-0.176049,PAD
 London Road (Brighton),50.836773,-0.136696,LRB
 London Road (Guildford),51.24067,-0.56506,LRD
-London St Pancras International,51.531921,-0.126361,STP
+St Pancras International,51.531921,-0.126361,STP
 London Victoria,51.4966,-0.1448,VIC
 London Waterloo,51.501865,-0.111126,WAT
 London Waterloo East,51.504513,-0.10814,WAE
@@ -2243,7 +2243,7 @@ Sunningdale,51.391312,-0.633135,SNG
 Sunnymeads,51.470451,-0.558781,SNY
 Surbiton,51.392406,-0.303942,SUR
 Surrey Quays,51.49279,0.048114,SQE
-Sutton (London),51.360126,-0.190223,SUO
+Sutton (Surrey),51.360126,-0.190223,SUO
 Sutton Coldfield,52.565269,-1.824404,SUT
 Sutton Common,51.375519,-0.196799,SUC
 Sutton Parkway,53.122108,-1.236385,SPK
