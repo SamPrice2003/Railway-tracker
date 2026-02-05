@@ -7,7 +7,7 @@ from logging import getLogger, basicConfig, INFO
 from dotenv import load_dotenv
 from psycopg2 import connect, sql
 from psycopg2.extensions import connection
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor, execute_values
 
 from extract import get_stomp_listener
 from transform import get_transformed_message
@@ -56,28 +56,46 @@ def get_service_id(conn: connection, origin_station: str, destination_station: s
         return cur.fetchone()
 
 
-def upload_data(conn: connection, incident_data: dict) -> None:
-    """Uploads the incident data to the RDS database."""
+def upload_service_assignment_data(conn: connection, incident_data: dict) -> None:
+    """Uploads the services affected by the incident data as entries in
+    the service assignment table. Expects incident_id key in the incident data."""
+
+    logger.info("Uploading service assignment data to RDS database.")
+
+    data = incident_data.copy()
+
+    data["services_affected"] = [(get_service_id(
+        conn, service["origin_station"], service["destination_station"]), data["incident_id"]) for service in data["services_affected"]]
+
+    with conn.cursor() as cur:
+
+        execute_values(cur, """
+                       INSERT INTO service_assignment (service_id, incident_id)
+                       VALUES %s
+                       ;
+                       """, data["services_affected"])
+
+    logger.info("Finished uploading service assignment data to RDS database.")
+
+
+def upload_incident_data(conn: connection, incident_data: dict) -> int:
+    """Uploads the incident data to the RDS database.
+    Returns the incident ID of the incident row created."""
 
     logger.info("Uploading incident data to RDS database.")
 
     data = incident_data.copy()
-
-    origin_station = data["services_affected"][0]["origin_station"]
-    destination_station = data["services_affected"][0]["destination_station"]
 
     del data["services_affected"]
     del data["operator"]
 
     with conn.cursor() as cur:
 
-        data["service_id"] = get_service_id(
-            conn, origin_station, destination_station)
-
         cur.execute(sql.SQL(
             """
             INSERT INTO incident ({0})
             VALUES ({1})
+            RETURNING incident_id
             ;
             """).format(
                 sql.SQL(", ").join(
@@ -86,9 +104,13 @@ def upload_data(conn: connection, incident_data: dict) -> None:
                     map(lambda val: sql.Identifier(val), incident_data.values()))
         ))
 
+        incident_id = cur.fetchone()
+
     conn.commit()
 
     logger.info("Finished uploading incident data to RDS database.")
+
+    return incident_id
 
 
 if __name__ == "__main__":
