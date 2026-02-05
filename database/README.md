@@ -7,12 +7,14 @@ To create the schema and seed the database, simply do the following steps:
 1. Run `cd database` to move into the database directory.
 2. Run `touch .env` to create the environment variables folder.
 3. Populate this folder with these environment variables of the form:
-    - DB_HOST= *POSTGRES DATABASE HOST LINK*
-    - DB_PORT= *PORT FOR POSTGRES DATABASE*
-    - DB_NAME= *NAME OF DATABASE*
-    - DB_USERNAME= *NAME OF USER*
-    - DB_PASSWORD= *DATABASE PASSWORD*
-3. Finally, run `bash run_schema.sh` to create the schema and seed the data.
+```
+DB_HOST= <rds_host_link>
+DB_PORT= 5432
+DB_NAME= <database_name>
+DB_USERNAME= <your_database_username>
+DB_PASSWORD= <your_database_password>
+```
+4. Finally, run `bash run_schema.sh` to create the schema and seed the data.
 
 ## Description of files
 
