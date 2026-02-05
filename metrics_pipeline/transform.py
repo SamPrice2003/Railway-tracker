@@ -45,8 +45,8 @@ def get_db_conn(config: _Environ) -> connection:
     )
 
 
-def get_station_id_dict(conn: connection) -> list[dict]:
-    """Returns a dictionary with station_crs codes along with the station ids.
+def get_station_id_list(conn: connection) -> list[dict]:
+    """Returns a list of dictionaries with station_crs codes along with the station ids and names.
        This is so we can input the arrival data with the valid columns."""
 
     sql = """SELECT station_id, station_crs, station_name
@@ -61,15 +61,28 @@ def get_station_id_dict(conn: connection) -> list[dict]:
     return result
 
 
+def get_operator_id_list(conn: connection) -> list[dict]:
+    """Returns a list of dictionaries with the operator name and it's ID in the database."""
+
+    sql = """SELECT operator_id, operator_name
+             FROM operator;
+             """
+
+    with conn.cursor() as cur:
+        cur.execute(sql)
+
+        result = cur.fetchall()
+
+    return result
+
+
 def assign_station_id_to_service(df: pd.DataFrame, station_crs_list: list[dict], column_name: str, origin: bool) -> pd.DataFrame:
     """Assigns the operator_station_id based on the station data in the database."""
 
-    # need to iterate through rows in the df and add new column with
-    # the corresponding crs id in it
     station_crs_dict = {}
     for entry in station_crs_list:
         station_name = entry["station_name"].replace(" Rail Station", "")
-        station_id = entry["station_id"]
+        station_id = int(entry["station_id"])
         station_crs_dict[station_name] = station_id
 
     if origin:
@@ -79,6 +92,19 @@ def assign_station_id_to_service(df: pd.DataFrame, station_crs_list: list[dict],
 
     return df
 
+
+def assign_operator_id_to_service(df: pd.DataFrame, operator_name_list: list[dict]) -> pd.DataFrame:
+    """Assigns the operator name to the operator id in the database."""
+
+    operator_name_dict = {}
+    for entry in operator_name_list:
+        operator_name = entry["operator_name"]
+        operator_id = int(entry["operator_id"])
+        operator_name_dict[operator_name] = operator_id
+
+    df["operator_id"] = df["operator_name"].map(operator_name_dict)
+
+    return df
 
 # FORMAT THE DATA NEEDS TO BE IN FOR SERVICES:
 # service_id (DONE)
@@ -111,7 +137,7 @@ if __name__ == "__main__":
     service_df = get_data_from_csv_for_test("test_service")
     arrival_df = get_data_from_csv_for_test("test_arrival")
 
-    db_station_ids = get_station_id_dict(conn=conn)
+    db_station_ids = get_station_id_list(conn=conn)
 
     service_df = assign_station_id_to_service(
         service_df, db_station_ids, "origin_station_id", origin=True)
@@ -119,15 +145,8 @@ if __name__ == "__main__":
     service_df = assign_station_id_to_service(
         service_df, db_station_ids, "destination_station_id", origin=False)
 
-    for col_name in service_df.columns:
-        print(col_name)
-        print(service_df[service_df[col_name].isna()])
+    db_operator_ids = get_operator_id_list(conn=conn)
 
-# st pancras intl
-# abbey wood
-# sutton
-# heathrow terminal 4
-# st albans
-# paris nord
-# amsterdam cs
-# cambridge north
+    service_df = assign_operator_id_to_service(service_df, db_operator_ids)
+
+    print(service_df[service_df["operator_id"].isna()])
