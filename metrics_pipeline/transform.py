@@ -14,27 +14,7 @@ from extract import extract
 logger = getLogger(__name__)
 
 
-def convert_data_to_df(data: list) -> pd.DataFrame:
-    """Converts a list of dictionaries to a dataframe."""
-
-    return pd.DataFrame(data)
-
-
-def convert_df_to_csv_for_test(df: pd.DataFrame, filename: str) -> None:
-    """GET RID LATER"""
-
-    df.to_csv(f"./test_{filename}.csv")
-
-
-def get_data_from_csv_for_test(filename: str) -> None:
-    """GET RID LATER"""
-
-    df = pd.read_csv(f"./{filename}.csv")
-
-    return df
-
-
-def get_db_conn(config: _Environ) -> connection:
+def get_db_connection(config: _Environ) -> connection:
     """Returns a connection to a PostgreSQL database with the environment variable credentials."""
 
     return connect(
@@ -48,8 +28,7 @@ def get_db_conn(config: _Environ) -> connection:
 
 
 def get_station_id_list(conn: connection) -> list[dict]:
-    """Returns a list of dictionaries with station_crs codes along with the station ids and names.
-       This is so we can input the arrival data with the valid columns."""
+    """Returns a list of dictionaries with station_crs codes along with the station ids and names."""
 
     sql = """SELECT station_id, station_crs, station_name
              FROM station;
@@ -132,9 +111,9 @@ def transform(config: _Environ, data: dict, conn: connection) -> dict:
 
     basicConfig(level=INFO)
 
-    service_df = convert_data_to_df(data["services"])
+    service_df = pd.DataFrame(data["services"])
     logger.info("Converted services to DataFrame")
-    arrival_df = convert_data_to_df(data["arrivals"])
+    arrival_df = pd.DataFrame(data["arrivals"])
     logger.info("Converted arrivals to DataFrame")
 
     db_station_ids = get_station_id_list(conn=conn)
@@ -172,6 +151,6 @@ if __name__ == "__main__":
 
     data = extract(ENV, station_crs_list=station_crs_list)
 
-    conn = get_db_conn(ENV)
+    conn = get_db_connection(ENV)
 
     DATA = transform(ENV, data, conn)
