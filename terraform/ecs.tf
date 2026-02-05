@@ -133,7 +133,7 @@ resource "aws_ecs_service" "railway-listener-service" {
   force_delete     = true
 
   network_configuration {
-    subnets = var.PUBLIC_SUBNET_IDS
+    subnets = data.aws_subnets.public_subnets.ids
     assign_public_ip = true
     security_groups  = [aws_security_group.railway-listener-sg.id]
   }
@@ -212,7 +212,7 @@ resource "aws_ecs_service" "railway-dashboard-service" {
   force_delete     = true
 
   network_configuration {
-    subnets = var.PUBLIC_SUBNET_IDS
+    subnets = data.aws_subnets.public_subnets.ids
     assign_public_ip = true
     security_groups  = [aws_security_group.railway-dashboard-sg.id]
   }
