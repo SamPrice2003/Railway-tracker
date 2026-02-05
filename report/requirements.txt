@@ -1,1 +1,3 @@
-fpdf2
+xhtml2pdf
+python-dotenv
+boto3
