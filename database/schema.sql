@@ -10,14 +10,14 @@ DROP TABLE IF EXISTS station;
 
 CREATE TABLE station (
     station_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    station_name VARCHAR UNIQUE NOT NULL,
+    station_name VARCHAR NOT NULL,
     station_crs VARCHAR UNIQUE NOT NULL
 );
 
 CREATE TABLE operator (
     operator_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     operator_name VARCHAR UNIQUE NOT NULL,
-    description VARCHAR
+    url VARCHAR
 );
 
 CREATE TABLE service (
@@ -62,4 +62,7 @@ CREATE TABLE incident_assignment (
 );
 
 
+\copy station(station_name, station_crs) from './crs.csv' WITH DELIMITER ',' CSV HEADER;
+        
+\copy operator (operator_name, url) from './operators.csv' WITH DELIMITER ',' CSV HEADER;
 
