@@ -187,12 +187,3 @@ if __name__ == "__main__":
     chosen_stations = ["LBG", "STP", "KGX", "SHF", "LST"]
 
     DATA = extract(ENV, chosen_stations)
-
-
-# issue:
-# the data that came from the scraped stations has slightly different names/ naming convention
-# than the data that comes from the api requests, meaning when I try to
-# map the station to the correct name to get a station id column in the service table,
-# nothing maps since the names are all different.
-# my issue is I'm not sure if I can match the station names.
-# so far I have a dictionary pulled from the database which contains each stations
