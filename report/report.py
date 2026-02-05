@@ -12,6 +12,12 @@ import boto3
 LOGO_SRC = "../logo/default.png"
 
 
+def generate_report_filename() -> str:
+    """Returns a filename for the report depending on the current date."""
+
+    return f"{datetime.strftime(datetime.today(), " % Y-%m-%d")}-summary-report-national-rail.pdf"
+
+
 def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
     """Converts a HTML template to PDF and saves it under the specified name.
     Returns whether the conversion and saving was successful."""
@@ -29,6 +35,7 @@ def create_report(source_html: str) -> None:
     """Saves a PDF summary report, appending the source HTML into the PDF."""
 
     today = datetime.strftime(datetime.today(), "%Y/%m/%d")
+
     template = f'''
     <div>
         <img width=100 height=100 align="right" src="{LOGO_SRC}">
@@ -36,7 +43,7 @@ def create_report(source_html: str) -> None:
     </div>
     ''' + source_html
 
-    convert_html_to_pdf(template, "report.pdf")
+    convert_html_to_pdf(template, generate_report_filename())
 
 
 def handler(event=None, context=None):
