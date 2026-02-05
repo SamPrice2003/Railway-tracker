@@ -1,6 +1,6 @@
 """Script for generating a single PDF report on the past 24 hours of data."""
 
-from os import environ as env
+from os import environ as ENV, _Environ
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
@@ -15,7 +15,9 @@ LOGO_SRC = "../logo/default.png"
 def generate_report_filename() -> str:
     """Returns a filename for the report depending on the current date."""
 
-    return f"{datetime.strftime(datetime.today(), " % Y-%m-%d")}-summary-report-national-rail.pdf"
+    today = datetime.strftime(datetime.today(), "%Y-%m-%d")
+
+    return f"{today}-summary-report-national-rail.pdf"
 
 
 def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
@@ -39,17 +41,50 @@ def create_report(source_html: str) -> None:
     template = f'''
     <div>
         <img width=100 height=100 align="right" src="{LOGO_SRC}">
-        <h1 style="font-size: 30px">{today} - Summary Report for National Rail</h1>
+        <h1 align="center" style="font-size: 30px">{today} - Summary Report for National Rail</h1>
     </div>
     ''' + source_html
 
     convert_html_to_pdf(template, generate_report_filename())
 
 
+def send_email(config: _Environ):
+
+    client = boto3.client("ses",
+                          region_name=config["AWS_REGION"],
+                          aws_access_key_id=config["AWS_ACCESS_KEY"],
+                          aws_secret_access_key=config["AWS_SECRET_KEY"])
+    message = MIMEMultipart()
+    message["Subject"] = "Local Test"
+
+    report_filename = generate_report_filename()
+
+    attachment = MIMEApplication(open(report_filename, "rb").read())
+    attachment.add_header("Content-Disposition",
+                          "attachment", filename=report_filename)
+    message.attach(attachment)
+
+    print(message)
+
+    client.send_raw_email(
+        Source="sl-coaches@proton.me",
+        Destinations=[
+            "trainee.omar.yahya@sigmalabs.co.uk",
+        ],
+        RawMessage={
+            'Data': message.as_string()
+        }
+    )
+
+
 def handler(event=None, context=None):
     """Lambda function handler for generating PDF reports."""
 
+    load_dotenv()
+
     create_report("")
+
+    send_email(ENV)
 
 
 if __name__ == "__main__":
