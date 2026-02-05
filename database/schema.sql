@@ -25,9 +25,9 @@ CREATE TABLE operator (
 CREATE TABLE service (
     service_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     service_uid VARCHAR(6) UNIQUE NOT NULL,
-    origin_station_id INT NOT NULL,
-    destination_station_id INT NOT NULL,
-    operator_id INT NOT NULL,
+    origin_station_id INT,
+    destination_station_id INT,
+    operator_id INT,
     FOREIGN KEY (origin_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
     FOREIGN KEY (destination_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
     FOREIGN KEY (operator_id) REFERENCES operator(operator_id) ON DELETE CASCADE
@@ -38,7 +38,7 @@ CREATE TABLE arrival (
     scheduled_time TIMESTAMP,
     actual_time TIMESTAMP,
     platform_changed BOOLEAN,
-    arrival_station_id INT NOT NULL,
+    arrival_station_id INT,
     service_id INT NOT NULL,
     FOREIGN KEY (arrival_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE

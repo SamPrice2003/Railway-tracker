@@ -126,10 +126,14 @@ def transform(config: _Environ, data: dict, conn: connection) -> dict:
     logger.info("Retrieved operator ids from RDS")
 
     service_df = assign_operator_id_to_service(service_df, db_operator_ids)
-    logger.info("Assigned operator ids to services")
+    service_df = service_df[["service_uid", "origin_station_id",
+                             "destination_station_id", "operator_id"]]
+    logger.info("Formatted service dataframe")
 
     arrival_df = assign_station_id_to_arrival(arrival_df, db_station_ids)
-    logger.info("Assigned operator ids to arrivals")
+    arrival_df = arrival_df[["scheduled_arr_time",
+                             "actual_arr_time", "platform_changed", "arrival_station_id", "service_uid"]]
+    logger.info("Formatted arrival dataframe")
 
     result = {}
 
