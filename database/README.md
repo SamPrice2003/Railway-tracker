@@ -2,7 +2,7 @@
 
 ## Setup / Operation
 
-To create the schema and seed the database, simply do the following steps:
+To create the schema and seed the database, simply run the following steps:
 
 1. Run `cd database` to move into the database directory.
 2. Run `touch .env` to create the environment variables folder.

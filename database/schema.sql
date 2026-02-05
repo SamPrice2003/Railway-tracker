@@ -1,16 +1,18 @@
 -- Schema for the PostgreSQL database on AWS RDS
 
-DROP TABLE IF EXISTS incident_assignment;
-DROP TABLE IF EXISTS incident;
-DROP TABLE IF EXISTS arrival;
-DROP TABLE IF EXISTS service;
-DROP TABLE IF EXISTS operator;
-DROP TABLE IF EXISTS station;
+DROP TABLE IF EXISTS incident_assignment CASCADE;
+DROP TABLE IF EXISTS incident CASCADE;
+DROP TABLE IF EXISTS arrival CASCADE;
+DROP TABLE IF EXISTS service CASCADE;
+DROP TABLE IF EXISTS operator CASCADE;
+DROP TABLE IF EXISTS station CASCADE;
 
 
 CREATE TABLE station (
     station_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     station_name VARCHAR NOT NULL,
+    latitude FLOAT NOT NULL,
+    longitude FLOAT NOT NULL,
     station_crs VARCHAR UNIQUE NOT NULL
 );
 
@@ -62,7 +64,7 @@ CREATE TABLE incident_assignment (
 );
 
 
-\copy station(station_name, station_crs) from './crs.csv' WITH DELIMITER ',' CSV HEADER;
+\copy station(station_name, latitude, longitude, station_crs) from './crs.csv' WITH DELIMITER ',' CSV HEADER;
         
 \copy operator (operator_name, url) from './operators.csv' WITH DELIMITER ',' CSV HEADER;
 
