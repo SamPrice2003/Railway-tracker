@@ -1,10 +1,11 @@
-"""The transform script which takes extracted data from the RTT API and transforms it, ready to load into RDS."""
+"""The transform script which takes extracted data \
+    from the RTT API and transforms it, ready to load into RDS."""
 
 from logging import getLogger, basicConfig, INFO
 from os import environ as ENV, _Environ
 
 import pandas as pd
-from psycopg2 import connect, sql
+from psycopg2 import connect
 from psycopg2.extensions import connection
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
@@ -28,7 +29,8 @@ def get_db_connection(config: _Environ) -> connection:
 
 
 def get_station_id_list(conn: connection) -> list[dict]:
-    """Returns a list of dictionaries with station_crs codes along with the station ids and names."""
+    """Returns a list of dictionaries with \
+        station_crs codes along with the station ids and names."""
 
     sql = """SELECT station_id, station_crs, station_name
              FROM station;
@@ -57,7 +59,10 @@ def get_operator_id_list(conn: connection) -> list[dict]:
     return result
 
 
-def assign_station_id_to_service(df: pd.DataFrame, station_crs_list: list[dict], column_name: str, origin: bool) -> pd.DataFrame:
+def assign_station_id_to_service(df: pd.DataFrame,
+                                 station_crs_list: list[dict],
+                                 column_name: str,
+                                 origin: bool) -> pd.DataFrame:
     """Assigns the operator_station_id based on the station data in the database."""
 
     station_crs_dict = {}
