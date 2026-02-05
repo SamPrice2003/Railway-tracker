@@ -59,26 +59,16 @@ def get_operator_id_list(conn: connection) -> list[dict]:
     return result
 
 
-def assign_station_id_to_service(df: pd.DataFrame,
-                                 station_crs_list: list[dict],
-                                 column_name: str,
-                                 origin: bool) -> pd.DataFrame:
-    """Assigns the operator_station_id based on the station data in the database."""
+def get_station_name_dict(station_crs_list: list[dict]) -> dict:
+    """Gets the station crs dictionary, containing the name and station_id"""
 
-    station_crs_dict = {}
+    station_name_dict = {}
     for entry in station_crs_list:
         station_name = entry["station_name"].replace(" Rail Station", "")
         station_id = entry["station_id"]
-        station_crs_dict[station_name] = station_id
+        station_name_dict[station_name] = station_id
 
-    if origin:
-        df[column_name] = df["origin_station"].map(
-            station_crs_dict).astype("Int64")
-    else:
-        df[column_name] = df["destination_station"].map(
-            station_crs_dict).astype("Int64")
-
-    return df
+    return station_name_dict
 
 
 def assign_station_id_to_arrival(df: pd.DataFrame, station_crs_list: list[dict]) -> pd.DataFrame:
@@ -124,11 +114,13 @@ def transform(config: _Environ, data: dict, conn: connection) -> dict:
     db_station_ids = get_station_id_list(conn=conn)
     logger.info("Retrieved station ids from RDS")
 
-    service_df = assign_station_id_to_service(
-        service_df, db_station_ids, "origin_station_id", origin=True)
-    service_df = assign_station_id_to_service(
-        service_df, db_station_ids, "destination_station_id", origin=False)
-    logger.info("Assigned station ids to services")
+    station_name_dict = get_station_name_dict(db_station_ids)
+
+    service_df["origin_station_id"] = service_df["origin_station"].map(
+        station_name_dict).astype("Int64")
+    service_df["destination_station_id"] = service_df["destination_station"].map(
+        station_name_dict).astype("Int64")
+    logger.info("Assigned service station ids")
 
     db_operator_ids = get_operator_id_list(conn=conn)
     logger.info("Retrieved operator ids from RDS")
