@@ -59,7 +59,7 @@ def get_station_data(session: requests.Session,
         return response
 
     # instead get the crs from the user known station name
-    
+
     if station_name is None:
         raise TypeError("Cannot leave both crs and station name empty.")
 
@@ -102,9 +102,9 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
     """Returns a list of dictionaries containing
           the arrival details from all stops on that service."""
 
-    today = datetime.now().year
-    
-    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}\{today.year}/{today.month:02d}/{today.day:02d}"
+    today = datetime.now()
+
+    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}/{today.year}/{today.month:02d}/{today.day:02d}"
 
     response = session.get(url=rtt_url).json()
 
@@ -156,7 +156,11 @@ def extract(config: _Environ, station_crs_list: list[str]) -> dict:
             station_crs=crs, session=session))
         logger.info(f"Retrieved service details for {crs}")
 
-    service_details_list = list(set(service_details_list))
+    # service_details_list = list(set(service_details_list))
+    service_details_list = list({frozenset(d.items())
+                                for d in service_details_list})
+    service_details_list = [dict(f) for f in service_details_list]
+
     logger.info("Removed duplicate services")
 
     arrival_details_list = []
