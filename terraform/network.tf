@@ -4,17 +4,17 @@ data "aws_vpc" "cohort_vpc" {
   id = var.VPC_ID
 }
 
-################### Subnets ###################
+################### Public Subnets ###################
 
 data "aws_subnets" "public_subnets" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.cohort_vpc.id]
+    values = [var.VPC_ID]
   }
 
   filter {
-    name   = "tag:Name"
-    values = ["c21-public-subnet-*"]
+    name   = "map-public-ip-on-launch"
+    values = ["true"]
   }
 }
 

@@ -1,9 +1,3 @@
-################### ECS Cluster ###################
-
-data "aws_ecs_cluster" "c21-cluster" {
-  cluster_name = var.CLUSTER_NAME
-}
-
 ################### CloudWatch Logs ###################
 
 resource "aws_cloudwatch_log_group" "listener" {
@@ -125,7 +119,7 @@ resource "aws_ecs_task_definition" "railway-listener-task" {
 
 resource "aws_ecs_service" "railway-listener-service" {
   name             = "c21-railway-tracker-listener-service"
-  cluster          = data.aws_ecs_cluster.c21-cluster.id
+  cluster = data.aws_ecs_cluster.c21_cluster.id
   task_definition  = aws_ecs_task_definition.railway-listener-task.arn
   launch_type      = "FARGATE"
   platform_version = "LATEST"
@@ -204,7 +198,7 @@ resource "aws_ecs_task_definition" "railway-dashboard-task" {
 
 resource "aws_ecs_service" "railway-dashboard-service" {
   name             = "c21-railway-tracker-dashboard-service"
-  cluster          = data.aws_ecs_cluster.c21-cluster.id
+  cluster = data.aws_ecs_cluster.c21_cluster.id
   task_definition  = aws_ecs_task_definition.railway-dashboard-task.arn
   launch_type      = "FARGATE"
   platform_version = "LATEST"
