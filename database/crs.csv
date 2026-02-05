@@ -9,7 +9,7 @@ Aberdeen Rail Station,ABD
 Abererch Rail Station,ABH
 Abergavenny Rail Station,AGV
 Aberystwyth Rail Station,AYW
-Abbey Wood (London) Rail Station,ABW
+Abbey Wood Rail Station,ABW
 Acton Bridge Rail Station,ACB
 Achanalt Rail Station,AAT
 Achnashellach Rail Station,ACH
@@ -421,6 +421,7 @@ Calstock Rail Station,CSK
 Cambridge Rail Station,CBG
 Camelon Rail Station,CMO
 Cambridge Heath (London) Rail Station,CBH
+Cambridge North Rail Station, CMB
 Canley Rail Station,CNL
 London Cannon Street Rail Station,CST
 Carbis Bay Rail Station,CBB
@@ -1207,9 +1208,9 @@ Horton-in-Ribblesdale Rail Station,HIR
 Heathrow Airport Terminal 5,HWX
 Heathrow Terminals 1-3 Rail Station,LHR
 Heathrow Airport Central Bus Stn (Rail-Air),HTR
-Heathrow Terminal 4 (Rail-Air),HWF
-Heathrow Terminal 4 Rail Station,HAF
-Heathrow Terminal 5 Rail Station,HWV
+Heathrow Airport Terminal 4 (Rail-Air),HWF
+Heathrow Airport Terminal 4 Rail Station,HAF
+Heathrow Airport Terminal 5 Rail Station,HWV
 Hucknall Rail Station,HKN
 Hull Rail Station,HUL
 Huncoat Rail Station,HCT
@@ -2132,7 +2133,7 @@ South Ruislip Rail Station,SRU
 Southsea Hoverport,SHV
 Stafford Rail Station,STA
 Staines Rail Station,SNS
-St Albans City Rail Station,SAC
+St Albans Rail Station,SAC
 St Albans Abbey Rail Station,SAA
 Stamford Rail Station,SMD
 Stansted Airport Rail Station,SSD
@@ -2195,9 +2196,9 @@ Stoke-on-Trent Rail Station,SOT
 Stone Rail Station,SNE
 South Tottenham Rail Station,STO
 Stow Rail Station,SOI
-London St Pancras International Rail Station,STP
+St Pancras International,STP
 Stapleton Road Rail Station,SRD
-London St Pancras International LL Rail Station,SPL
+St Pancras International,SPL
 Stourbridge Junction Rail Station,SBJ
 Stourbridge Town Rail Station,SBT
 Starcross Rail Station,SCS
@@ -2225,7 +2226,7 @@ Sunnymeads Rail Station,SNY
 Surbiton Rail Station,SUR
 Surrey Quays Rail Station,SQE
 Sutton Coldfield Rail Station,SUT
-Sutton (London) Rail Station,SUO
+Sutton Rail Station,SUO
 Sutton Common Rail Station,SUC
 Seven Kings Rail Station,SVK
 Sevenoaks Rail Station,SEV
