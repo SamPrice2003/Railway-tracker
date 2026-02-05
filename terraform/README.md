@@ -55,29 +55,29 @@ You must have:
 ### 1. Create a file named terraform.tfvars in this folder and populate it with your environment values, the required values are listed below:
 
 ```
-AWS_REGION  = ""
-VPC_ID = ""
-CLUSTER_NAME = ""
-AWS_ACCOUNT_ID = ""
-AWS_ACCESS_KEY_ID = ""
-AWS_SECRET_ACCESS_KEY = ""
+AWS_REGION  = "<your_aws_region>"
+VPC_ID = "<your_aws_VPC_ID>"
+CLUSTER_NAME = "<your_aws_cluster_name>"
+AWS_ACCOUNT_ID = "<your_aws_account_id>"
+AWS_ACCESS_KEY_ID = "<your_aws_access_key_id>"
+AWS_SECRET_ACCESS_KEY = "<your_aws_secret_access_key>"
 
-PUBLIC_SUBNET_IDS = ["",""]
+PUBLIC_SUBNET_IDS = ["<your_aws_public_subnet_1>","<your_aws_public_subnet_1>"]
 
-LISTENER_IMAGE_URI  = ""
-DASHBOARD_IMAGE_URI = ""
-METRICS_LAMBDA_IMAGE_URI = ""
-REPORTS_LAMBDA_IMAGE_URI = ""
+LISTENER_IMAGE_URI  = "<your_ecr_uri>"
+DASHBOARD_IMAGE_URI = "<your_ecr_uri>"
+METRICS_LAMBDA_IMAGE_URI = "<your_ecr_uri>"
+REPORTS_LAMBDA_IMAGE_URI = "<your_ecr_uri>"
 
-S3_BUCKET_NAME = ""
+S3_BUCKET_NAME = "<your_s3_bucket_name>"
 
 DASHBOARD_PORT = 8501
 
-DB_HOST     = ""
-DB_PORT     = ""
-DB_NAME     = ""
-DB_USERNAME = ""
-DB_PASSWORD = ""
+DB_HOST     = "<your_db_host>"
+DB_PORT     = "<your_db_port>"
+DB_NAME     = "<your_db_name>"
+DB_USERNAME = "<your_db_username>"
+DB_PASSWORD = "<your_db_password>"
 ```
 
 Notes:
