@@ -148,20 +148,32 @@ def get_not_existing_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd
 
     existing_arrivals_df = get_existing_arrivals(conn)
 
-    return pd.concat([arrivals_df, existing_arrivals_df]).drop_duplicates(
-        subset=["scheduled_arr_time", "platform_changed",
-                "arrival_station_id", "service_uid"],
-        keep=False
-    )
+    if existing_arrivals_df.empty:
+        return arrivals_df
+
+    df = arrivals_df.merge(existing_arrivals_df, on=[
+                           "scheduled_arr_time", "arrival_station_id", "service_uid"], how='left', indicator=True)
+
+    df = df[df['_merge'] == 'left_only'].drop(columns='_merge')
+
+    df = df.rename(columns={"actual_arr_time_x": "actual_arr_time",
+                            "platform_changed_x": "platform_changed"})
+
+    return df
 
 
-def get_updated_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.DataFrame:
+def get_updating_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.DataFrame:
     """Returns the arrivals that will update an existing row in the arrivals table by actual_arr_time."""
 
     existing_arrivals_df = get_existing_arrivals(conn)
 
-    return pd.concat(
-        [arrivals_df, existing_arrivals_df]).drop_duplicates(keep="first")
+    pass
+
+    # if existing_arrivals_df.empty:
+    #     return pd.DataFrame()
+
+    # return arrivals_df.merge(existing_arrivals_df, on=[
+    #     "scheduled_arr_time", "arrival_station_id", "service_uid"], how='inner')
 
 
 def transform(data: dict, conn: connection) -> dict:
@@ -192,8 +204,10 @@ def transform(data: dict, conn: connection) -> dict:
     result = {
         "services": drop_existing_services(conn, service_df),
         "arrivals": get_not_existing_arrivals(conn, arrival_df),
-        "updated_arrivals": get_updated_arrivals(conn, arrival_df)
+        "updating_arrivals": get_updating_arrivals(conn, arrival_df)
     }
+
+    print(result["updating_arrivals"])
 
     logger.info("Transformed all data.")
 

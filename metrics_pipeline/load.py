@@ -7,6 +7,7 @@ from transform import transform, get_db_connection
 from extract import extract
 
 from psycopg2.extensions import connection
+from psycopg2.extras import execute_values
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -39,7 +40,7 @@ def upload_service_data(df: pd.DataFrame, conn: connection) -> None:
 
 
 def upload_arrival_data(df: pd.DataFrame, conn: connection) -> None:
-    """Uploads the data to the specified table in RDS."""
+    """Uploads the arrival data to the arrival table in RDS."""
 
     df.to_csv("./temp.csv", index=False)
 
@@ -60,6 +61,12 @@ def upload_arrival_data(df: pd.DataFrame, conn: connection) -> None:
         remove("./temp.csv")
 
     logger.info("Uploaded arrival data.")
+
+
+def update_arrival_data(updating_arrival_df: pd.DataFrame, conn: connection) -> None:
+    """Updates the existing arrival data in the arrival table in the RDS."""
+
+    pass
 
 
 def get_service_id_list(conn: connection) -> list[dict]:
@@ -99,6 +106,7 @@ if __name__ == "__main__":
 
     service_data = transformed_data["services"]
     arrivals_data = transformed_data["arrivals"]
+    updating_arrivals_data = transformed_data["updating_arrivals"]
 
     upload_service_data(service_data, conn)
 
