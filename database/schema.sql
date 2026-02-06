@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS operator CASCADE;
 DROP TABLE IF EXISTS station CASCADE;
 
 
-CREATE TABLE station (
+CREATE TABLE IF NOT EXISTS station (
     station_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     station_name VARCHAR NOT NULL,
     latitude FLOAT NOT NULL,
@@ -16,13 +16,13 @@ CREATE TABLE station (
     station_crs VARCHAR UNIQUE NOT NULL
 );
 
-CREATE TABLE operator (
+CREATE TABLE IF NOT EXISTS operator (
     operator_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     operator_name VARCHAR UNIQUE NOT NULL,
     url VARCHAR
 );
 
-CREATE TABLE service (
+CREATE TABLE IF NOT EXISTS service (
     service_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     service_uid VARCHAR(6) UNIQUE NOT NULL,
     origin_station_id INT,
@@ -33,7 +33,7 @@ CREATE TABLE service (
     FOREIGN KEY (operator_id) REFERENCES operator(operator_id) ON DELETE CASCADE
 );
 
-CREATE TABLE arrival (
+CREATE TABLE IF NOT EXISTS arrival (
     arrival_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     scheduled_time TIMESTAMP,
     actual_time TIMESTAMP,
@@ -41,10 +41,11 @@ CREATE TABLE arrival (
     arrival_station_id INT,
     service_id INT NOT NULL,
     FOREIGN KEY (arrival_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
-    FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE
+    FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE,
+    UNIQUE (scheduled_time, actual_time, arrival_station_id, service_id)
 );
 
-CREATE TABLE incident (
+CREATE TABLE IF NOT EXISTS incident (
     incident_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     summary TEXT,
     incident_start TIMESTAMP NOT NULL,
@@ -55,7 +56,7 @@ CREATE TABLE incident (
     FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE
 );
 
-CREATE TABLE incident_assignment (
+CREATE TABLE IF NOT EXISTS incident_assignment (
     incident_assignment_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     incident_id INT NOT NULL,
     operator_id INT NOT NULL,

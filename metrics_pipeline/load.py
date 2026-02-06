@@ -7,52 +7,49 @@ from transform import transform, get_db_connection
 from extract import extract
 
 from psycopg2.extensions import connection
+from psycopg2.extras import execute_values
 
 import pandas as pd
 from dotenv import load_dotenv
 
 
-def upload_service_data(df: pd.DataFrame, conn: connection) -> None:
-    """Uploads the data to the specified table in RDS."""
+def upload_service_data(data: list[dict], conn: connection) -> None:
+    """Uploads the service data to the service table in RDS"""
 
-    df.to_csv("./temp.csv", index=False)
-
-    with conn.cursor() as cur:
-        with open("./temp.csv", "r") as f:
-            cur.copy_expert("""COPY service
-                                    (service_uid,
-                                     origin_station_id,
-                                     destination_station_id,
-                                     operator_id)
-                            FROM STDIN
-                            WITH CSV HEADER""", f)
-
-        conn.commit()
-
-    if path.exists("./temp.csv"):
-        remove("./temp.csv")
-
-
-def upload_arrival_data(df: pd.DataFrame, conn: connection) -> None:
-    """Uploads the data to the specified table in RDS."""
-
-    df.to_csv("./temp.csv", index=False)
+    sql = f"""
+        INSERT INTO service
+            (service_uid,
+            origin_station_id,
+            destination_station_id,
+            operator_id
+            )
+        VALUES %s
+        ON CONFLICT (service_uid) DO NOTHING
+        """
 
     with conn.cursor() as cur:
-        with open("./temp.csv", "r") as f:
-            cur.copy_expert("""COPY arrival
-                                    (scheduled_time,
-                                     actual_time,
-                                     platform_changed,
-                                     arrival_station_id,
-                                     service_id)
-                            FROM STDIN
-                            WITH CSV HEADER""", f)
-
+        execute_values(cur, sql, )
         conn.commit()
 
-    if path.exists("./temp.csv"):
-        remove("./temp.csv")
+
+def upload_arrival_data(data: list[dict], conn: connection) -> None:
+    """Uploads the arrival data to the arrival table in RDS"""
+    rows = [()]
+    sql = f"""
+        INSERT INTO arrival
+            (scheduled_time,
+            actual_time,
+            platform_changed,
+            arrival_station_id,
+            service_id
+            )
+        VALUES %s
+        ON CONFLICT (scheduled_time, actual_time, arrival_station_id, service_id) DO NOTHING
+        """
+
+    with conn.cursor() as cur:
+        execute_values(cur, sql, rows)
+        conn.commit()
 
 
 def get_service_id_list(conn: connection) -> list[dict]:
@@ -65,7 +62,7 @@ def get_service_id_list(conn: connection) -> list[dict]:
     return result
 
 
-def get_service_id_dict(service_id_list: list) -> pd.DataFrame:
+def get_service_id_dict(service_id_list: list) -> list[dict]:
     """Assigns a service id to each arrival so we can upload properly."""
 
     service_id_dict = {}
@@ -84,7 +81,8 @@ if __name__ == "__main__":
 
     conn = get_db_connection(ENV)
 
-    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST"]
+    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST",
+                        "BHM", "MAN", "LDS", "BRI", "EDB"]
 
     data = extract(ENV, station_crs_list)
 
@@ -92,6 +90,8 @@ if __name__ == "__main__":
 
     service_data = data["services"]
     arrivals_data = data["arrivals"]
+
+    print(service_data.dtypes)
 
     upload_service_data(service_data, conn)
 

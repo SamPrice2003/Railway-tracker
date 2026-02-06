@@ -137,8 +137,8 @@ def transform(config: _Environ, data: dict, conn: connection) -> dict:
 
     result = {}
 
-    result["services"] = service_df
-    result["arrivals"] = arrival_df
+    result["services"] = service_df.to_dict('records')
+    result["arrivals"] = arrival_df.to_dict('records')
 
     logger.info("Transformation complete")
     return result
@@ -148,7 +148,8 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST"]
+    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST",
+                        "BHM", "MAN", "LDS", "BRI", "EDB"]
 
     data = extract(ENV, station_crs_list=station_crs_list)
 
