@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from extract import extract
 
 logger = getLogger(__name__)
+basicConfig(level=INFO)
 
 
 def get_db_connection(config: _Environ) -> connection:
@@ -40,6 +41,8 @@ def get_station_id_list(conn: connection) -> list[dict]:
 
         result = cur.fetchall()
 
+    logger.info("Retrieved station ids from RDS.")
+
     return result
 
 
@@ -54,6 +57,8 @@ def get_operator_id_list(conn: connection) -> list[dict]:
         cur.execute(sql)
 
         result = cur.fetchall()
+
+    logger.info("Retrieved operator ids from RDS")
 
     return result
 
@@ -99,47 +104,71 @@ def assign_operator_id_to_service(df: pd.DataFrame, operator_name_list: list[dic
     return df
 
 
+def drop_existing_services(conn: connection, services_df: pd.DataFrame) -> pd.DataFrame:
+    """Returns a dataframe which has deleted all services already existing in the service table."""
+
+    sql = """SELECT service_uid
+            FROM service
+            ;"""
+
+    with conn.cursor() as cur:
+        cur.execute(sql)
+
+        existing_services = [service_dict["service_uid"]
+                             for service_dict in cur.fetchall()]
+
+    logger.info(existing_services)
+
+    return services_df[~services_df["service_uid"].isin(existing_services)]
+
+
+def drop_existing_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.DataFrame:
+    """Returns a dataframe which has deleted all arrivals already existing in the arrival table."""
+
+    sql = """SELECT *
+            FROM arrival
+            ;"""
+
+    with conn.cursor() as cur:
+        cur.execute(sql)
+
+        existing_arrivals_df = pd.DataFrame(cur.fetchall())
+
+    return arrivals_df[~arrivals_df.isin(existing_arrivals_df)]
+
+
 def transform(data: dict, conn: connection) -> dict:
     """Returns a dictionary containing the transformed service and arrival data.
        Apart from service_id in arrival, which needs to be loaded first to access."""
 
-    basicConfig(level=INFO)
-
     service_df = pd.DataFrame(data["services"])
-    logger.info("Converted services to DataFrame")
     arrival_df = pd.DataFrame(data["arrivals"])
-    logger.info("Converted arrivals to DataFrame")
 
     db_station_ids = get_station_id_list(conn=conn)
-    logger.info("Retrieved station ids from RDS")
 
-    station_name_dict = get_station_dict(db_station_ids)
+    station_dict = get_station_dict(db_station_ids)
 
     service_df["origin_station_id"] = service_df["origin_station"].map(
-        station_name_dict).astype("Int64")
+        station_dict).astype("Int64")
     service_df["destination_station_id"] = service_df["destination_station"].map(
-        station_name_dict).astype("Int64")
-    logger.info("Assigned service station ids")
+        station_dict).astype("Int64")
 
     db_operator_ids = get_operator_id_list(conn=conn)
-    logger.info("Retrieved operator ids from RDS")
 
-    service_df = assign_operator_id_to_service(service_df, db_operator_ids)
-    service_df = service_df[["service_uid", "origin_station_id",
-                             "destination_station_id", "operator_id"]]
-    logger.info("Formatted service dataframe")
+    service_df = assign_operator_id_to_service(service_df, db_operator_ids)[["service_uid", "origin_station_id",
+                                                                             "destination_station_id", "operator_id"]]
 
-    arrival_df = assign_station_id_to_arrival(arrival_df, db_station_ids)
-    arrival_df = arrival_df[["scheduled_arr_time",
-                             "actual_arr_time", "platform_changed", "arrival_station_id", "service_uid"]]
-    logger.info("Formatted arrival dataframe")
+    arrival_df = assign_station_id_to_arrival(arrival_df, db_station_ids)[["scheduled_arr_time",
+                                                                           "actual_arr_time", "platform_changed",
+                                                                           "arrival_station_id", "service_uid"]]
 
-    result = {}
+    result = {
+        "services": drop_existing_services(conn, service_df),
+        "arrivals": drop_existing_arrivals(conn, arrival_df)
+    }
 
-    result["services"] = service_df
-    result["arrivals"] = arrival_df
+    logger.info("Transformed all data.")
 
-    logger.info("Transformation complete")
     return result
 
 
@@ -153,6 +182,6 @@ if __name__ == "__main__":
 
     conn = get_db_connection(ENV)
 
-    DATA = transform(data, conn)
+    transformed_data = transform(data, conn)
 
-    print(DATA)
+    print(transformed_data)
