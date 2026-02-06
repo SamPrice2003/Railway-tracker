@@ -1,4 +1,5 @@
-"""Script for generating a single PDF report on the past 24 hours of data."""
+"""Script for generating a single PDF report on the past 24 hours of data
+and sending emails with the attached report."""
 
 from os import environ as ENV, _Environ, remove, listdir
 from json import loads, dumps
