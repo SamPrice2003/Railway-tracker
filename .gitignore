@@ -102,6 +102,7 @@ terraform.*
 ./terraform/*.tfstate
 ./terraform/.terraform.lock.hcl
 
+*.pdf
 
 .venv
 
