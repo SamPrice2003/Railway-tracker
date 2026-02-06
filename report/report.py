@@ -1,8 +1,9 @@
 """Script for generating a single PDF report on the past 24 hours of data."""
 
-from os import environ as ENV, _Environ
+from os import environ as ENV, _Environ, remove, listdir
 from json import loads, dumps
 from datetime import datetime
+from re import match
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
@@ -57,6 +58,16 @@ def create_report(source_html: str) -> None:
     logger.info("Saved PDF summary report from HTML source.")
 
 
+def delete_pdf_reports() -> None:
+    """Deletes all PDF files in the current directory."""
+
+    all_files = listdir('.')
+
+    for file in all_files:
+        if match(r".*\.pdf", file):
+            remove(file)
+
+
 def send_email(config: _Environ, destination_emails: list[str]) -> None:
     """Sends an email attaching a PDF summary report to the destination emails.
     SOURCE_EMAIL must exist in the config."""
@@ -108,6 +119,8 @@ def handler(event=None, context=None):
     create_report("")
 
     send_email(ENV, loads(event)["destination_emails"])
+
+    delete_pdf_reports()
 
 
 if __name__ == "__main__":
