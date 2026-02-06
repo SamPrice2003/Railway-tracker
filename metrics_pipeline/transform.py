@@ -1,5 +1,4 @@
-"""The transform script which takes extracted data \
-    from the RTT API and transforms it, ready to load into RDS."""
+"""The transform script which takes extracted data from the RTT API and transforms it, ready to load into RDS."""
 
 from logging import getLogger, basicConfig, INFO
 from os import environ as ENV, _Environ

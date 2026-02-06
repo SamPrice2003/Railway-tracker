@@ -1,4 +1,4 @@
-""" The extract script responsible for extracting static data from the RTT api """
+"""The extract script responsible for extracting static data from the RTT API"""
 
 from os import environ as ENV, _Environ
 import json

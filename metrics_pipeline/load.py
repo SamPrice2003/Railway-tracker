@@ -1,4 +1,4 @@
-"""script to load the services and arrivals data into RDS."""
+"""Script to load the services and arrivals data into RDS."""
 
 from os import environ as ENV, _Environ, remove, path
 from logging import getLogger, basicConfig, INFO
@@ -10,6 +10,9 @@ from psycopg2.extensions import connection
 
 import pandas as pd
 from dotenv import load_dotenv
+
+logger = getLogger(__name__)
+basicConfig(level=INFO)
 
 
 def upload_service_data(df: pd.DataFrame, conn: connection) -> None:
