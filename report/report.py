@@ -1,21 +1,28 @@
 """Script for generating a single PDF report on the past 24 hours of data."""
 
 from os import environ as ENV, _Environ
+from json import loads, dumps
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+from email.mime.text import MIMEText
+from logging import getLogger, basicConfig, INFO
 
 from dotenv import load_dotenv
 from xhtml2pdf import pisa
 import boto3
 
+logger = getLogger(__name__)
+basicConfig(level=INFO)
+
 LOGO_SRC = "../logo/default.png"
+TODAY = datetime.today()
 
 
 def generate_report_filename() -> str:
     """Returns a filename for the report depending on the current date."""
 
-    today = datetime.strftime(datetime.today(), "%Y-%m-%d")
+    today = datetime.strftime(TODAY, "%Y-%m-%d")
 
     return f"{today}-summary-report-national-rail.pdf"
 
@@ -36,7 +43,7 @@ def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
 def create_report(source_html: str) -> None:
     """Saves a PDF summary report, appending the source HTML into the PDF."""
 
-    today = datetime.strftime(datetime.today(), "%Y/%m/%d")
+    today = datetime.strftime(TODAY, "%Y/%m/%d")
 
     template = f'''
     <div>
@@ -47,15 +54,22 @@ def create_report(source_html: str) -> None:
 
     convert_html_to_pdf(template, generate_report_filename())
 
+    logger.info("Saved PDF summary report from HTML source.")
 
-def send_email(config: _Environ):
+
+def send_email(config: _Environ, destination_emails: list[str]) -> None:
+    """Sends an email attaching a PDF summary report to the destination emails.
+    SOURCE_EMAIL must exist in the config."""
 
     client = boto3.client("ses",
                           region_name=config["AWS_REGION"],
                           aws_access_key_id=config["AWS_ACCESS_KEY"],
                           aws_secret_access_key=config["AWS_SECRET_KEY"])
     message = MIMEMultipart()
-    message["Subject"] = "Local Test"
+
+    today = datetime.strftime(TODAY, "%d/%m/%Y")
+
+    message["Subject"] = f"Daily Summary Report for National Rail - {today}"
 
     report_filename = generate_report_filename()
 
@@ -64,31 +78,42 @@ def send_email(config: _Environ):
                           "attachment", filename=report_filename)
     message.attach(attachment)
 
-    print(message)
+    text = f"""
+    Attached is a PDF summary report of National Rail train data on {today}. This includes historical analysis and incident data.
+    
+    Kind regards,
+
+    Signal Shift Team"""
+
+    message.attach(MIMEText(text))
 
     client.send_raw_email(
-        Source="sl-coaches@proton.me",
-        Destinations=[
-            "trainee.omar.yahya@sigmalabs.co.uk",
-        ],
+        Source=config["SOURCE_EMAIL"],
+        Destinations=destination_emails,
         RawMessage={
             'Data': message.as_string()
         }
     )
 
+    logger.info("Sent email to destination emails.")
+
 
 def handler(event=None, context=None):
-    """Lambda function handler for generating PDF reports."""
+    """Lambda function handler for generating PDF reports.
+    Event expects a JSON-formatted string of all destination emails to send the report to."""
 
     load_dotenv()
 
+    # Insert source HTML for report data via another script
     create_report("")
 
-    send_email(ENV)
+    send_email(ENV, loads(event)["destination_emails"])
 
 
 if __name__ == "__main__":
 
     load_dotenv()
 
-    handler()
+    your_email = input("Enter your email: ")
+
+    handler(event=dumps({"destination_emails": [your_email]}))
