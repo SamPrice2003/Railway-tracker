@@ -184,7 +184,6 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    chosen_stations = ["LBG", "STP", "KGX", "SHF", "LST",
-                       "BHM", "MAN", "LDS", "BRI", "EDB"]
+    chosen_stations = ["LBG", "STP", "KGX", "SHF", "LST"]
 
     DATA = extract(ENV, chosen_stations)

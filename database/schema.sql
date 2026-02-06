@@ -42,7 +42,6 @@ CREATE TABLE IF NOT EXISTS arrival (
     service_id INT NOT NULL,
     FOREIGN KEY (arrival_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE,
-    UNIQUE (scheduled_time, actual_time, arrival_station_id, service_id)
 );
 
 CREATE TABLE IF NOT EXISTS incident (
