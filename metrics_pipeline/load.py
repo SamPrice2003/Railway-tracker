@@ -35,6 +35,8 @@ def upload_service_data(df: pd.DataFrame, conn: connection) -> None:
     if path.exists("./temp.csv"):
         remove("./temp.csv")
 
+    logger.info("Uploaded service data.")
+
 
 def upload_arrival_data(df: pd.DataFrame, conn: connection) -> None:
     """Uploads the data to the specified table in RDS."""
@@ -56,6 +58,8 @@ def upload_arrival_data(df: pd.DataFrame, conn: connection) -> None:
 
     if path.exists("./temp.csv"):
         remove("./temp.csv")
+
+    logger.info("Uploaded arrival data.")
 
 
 def get_service_id_list(conn: connection) -> list[dict]:
@@ -91,10 +95,10 @@ if __name__ == "__main__":
 
     data = extract(ENV, station_crs_list)
 
-    data = transform(ENV, data, conn)
+    transformed_data = transform(data, conn)
 
-    service_data = data["services"]
-    arrivals_data = data["arrivals"]
+    service_data = transformed_data["services"]
+    arrivals_data = transformed_data["arrivals"]
 
     upload_service_data(service_data, conn)
 

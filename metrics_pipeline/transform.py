@@ -75,8 +75,8 @@ def get_station_dict(station_crs_list: list[dict]) -> dict:
     return station_name_dict
 
 
-def assign_station_id_to_arrival(df: pd.DataFrame, station_crs_list: list[dict]) -> pd.DataFrame:
-    """Assigns the operator_station_id based on the station data in the database."""
+def assign_station_id_to_arrival(arrival_df: pd.DataFrame, station_crs_list: list[dict]) -> pd.DataFrame:
+    """Assigns the arrival_station_id based on the station data in the database."""
 
     station_crs_dict = {}
     for entry in station_crs_list:
@@ -84,9 +84,10 @@ def assign_station_id_to_arrival(df: pd.DataFrame, station_crs_list: list[dict])
         station_id = entry["station_id"]
         station_crs_dict[station_crs] = station_id
 
-    df["arrival_station_id"] = df["crs"].map(station_crs_dict).astype("Int64")
+    arrival_df["arrival_station_id"] = arrival_df["crs"].map(
+        station_crs_dict).astype("Int64")
 
-    return df
+    return arrival_df
 
 
 def assign_operator_id_to_service(df: pd.DataFrame, operator_name_list: list[dict]) -> pd.DataFrame:
@@ -117,16 +118,21 @@ def drop_existing_services(conn: connection, services_df: pd.DataFrame) -> pd.Da
         existing_services = [service_dict["service_uid"]
                              for service_dict in cur.fetchall()]
 
-    logger.info(existing_services)
-
     return services_df[~services_df["service_uid"].isin(existing_services)]
 
 
 def drop_existing_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.DataFrame:
     """Returns a dataframe which has deleted all arrivals already existing in the arrival table."""
 
-    sql = """SELECT *
+    sql = """SELECT 
+                scheduled_time AS scheduled_arr_time,
+                actual_time AS actual_arr_time,
+                platform_changed,
+                arrival_station_id,
+                service_uid
             FROM arrival
+            JOIN service
+                USING (service_id)
             ;"""
 
     with conn.cursor() as cur:
@@ -134,7 +140,7 @@ def drop_existing_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.Da
 
         existing_arrivals_df = pd.DataFrame(cur.fetchall())
 
-    return arrivals_df[~arrivals_df.isin(existing_arrivals_df)]
+    return pd.concat([arrivals_df, existing_arrivals_df]).drop_duplicates(keep=False)
 
 
 def transform(data: dict, conn: connection) -> dict:
