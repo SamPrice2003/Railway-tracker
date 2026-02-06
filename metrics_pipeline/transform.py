@@ -18,18 +18,18 @@ def get_db_connection(config: _Environ) -> connection:
     """Returns a connection to a PostgreSQL database with the environment variable credentials."""
 
     return connect(
-        dbname=ENV["DB_NAME"],
-        host=ENV["DB_HOST"],
-        user=ENV["DB_USERNAME"],
-        password=ENV["DB_PASSWORD"],
+        dbname=config["DB_NAME"],
+        host=config["DB_HOST"],
+        user=config["DB_USERNAME"],
+        password=config["DB_PASSWORD"],
         port=5432,
         cursor_factory=RealDictCursor
     )
 
 
 def get_station_id_list(conn: connection) -> list[dict]:
-    """Returns a list of dictionaries with \
-        station_crs codes along with the station ids and names."""
+    """Returns a list of dictionaries with station_crs codes
+    along with the station ids and names."""
 
     sql = """SELECT station_id, station_crs, station_name
              FROM station;
@@ -44,7 +44,7 @@ def get_station_id_list(conn: connection) -> list[dict]:
 
 
 def get_operator_id_list(conn: connection) -> list[dict]:
-    """Returns a list of dictionaries with the operator name and it's ID in the database."""
+    """Returns a list of dictionaries with the operator name and its ID in the database."""
 
     sql = """SELECT operator_id, operator_name
              FROM operator;
@@ -58,14 +58,14 @@ def get_operator_id_list(conn: connection) -> list[dict]:
     return result
 
 
-def get_station_name_dict(station_crs_list: list[dict]) -> dict:
-    """Gets the station crs dictionary, containing the name and station_id"""
+def get_station_dict(station_crs_list: list[dict]) -> dict:
+    """Returns a station dict from list of dicts which maps
+    station names to their ids"""
 
     station_name_dict = {}
     for entry in station_crs_list:
         station_name = entry["station_name"].replace(" Rail Station", "")
-        station_id = entry["station_id"]
-        station_name_dict[station_name] = station_id
+        station_name_dict[station_name] = entry["station_id"]
 
     return station_name_dict
 
@@ -99,7 +99,7 @@ def assign_operator_id_to_service(df: pd.DataFrame, operator_name_list: list[dic
     return df
 
 
-def transform(config: _Environ, data: dict, conn: connection) -> dict:
+def transform(data: dict, conn: connection) -> dict:
     """Returns a dictionary containing the transformed service and arrival data.
        Apart from service_id in arrival, which needs to be loaded first to access."""
 
@@ -113,7 +113,7 @@ def transform(config: _Environ, data: dict, conn: connection) -> dict:
     db_station_ids = get_station_id_list(conn=conn)
     logger.info("Retrieved station ids from RDS")
 
-    station_name_dict = get_station_name_dict(db_station_ids)
+    station_name_dict = get_station_dict(db_station_ids)
 
     service_df["origin_station_id"] = service_df["origin_station"].map(
         station_name_dict).astype("Int64")
@@ -153,4 +153,6 @@ if __name__ == "__main__":
 
     conn = get_db_connection(ENV)
 
-    DATA = transform(ENV, data, conn)
+    DATA = transform(data, conn)
+
+    print(DATA)
