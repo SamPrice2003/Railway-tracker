@@ -121,8 +121,8 @@ def drop_existing_services(conn: connection, services_df: pd.DataFrame) -> pd.Da
     return services_df[~services_df["service_uid"].isin(existing_services)]
 
 
-def drop_existing_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.DataFrame:
-    """Returns a dataframe which has deleted all arrivals already existing in the arrival table."""
+def get_existing_arrivals(conn: connection) -> pd.DataFrame:
+    """Returns a dataframe of the existing arrivals in the arrivals table."""
 
     sql = """SELECT 
                 scheduled_time AS scheduled_arr_time,
@@ -133,14 +133,35 @@ def drop_existing_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.Da
             FROM arrival
             JOIN service
                 USING (service_id)
+            ORDER BY service_uid, actual_time
             ;"""
 
     with conn.cursor() as cur:
         cur.execute(sql)
 
-        existing_arrivals_df = pd.DataFrame(cur.fetchall())
+        return pd.DataFrame(cur.fetchall())
 
-    return pd.concat([arrivals_df, existing_arrivals_df]).drop_duplicates(keep=False)
+
+def get_not_existing_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.DataFrame:
+    """Returns a dataframe which contains arrivals not existing in the arrival table
+    regardless of the actual_arr_time column."""
+
+    existing_arrivals_df = get_existing_arrivals(conn)
+
+    return pd.concat([arrivals_df, existing_arrivals_df]).drop_duplicates(
+        subset=["scheduled_arr_time", "platform_changed",
+                "arrival_station_id", "service_uid"],
+        keep=False
+    )
+
+
+def get_updated_arrivals(conn: connection, arrivals_df: pd.DataFrame) -> pd.DataFrame:
+    """Returns the arrivals that will update an existing row in the arrivals table by actual_arr_time."""
+
+    existing_arrivals_df = get_existing_arrivals(conn)
+
+    return pd.concat(
+        [arrivals_df, existing_arrivals_df]).drop_duplicates(keep="first")
 
 
 def transform(data: dict, conn: connection) -> dict:
@@ -170,7 +191,8 @@ def transform(data: dict, conn: connection) -> dict:
 
     result = {
         "services": drop_existing_services(conn, service_df),
-        "arrivals": drop_existing_arrivals(conn, arrival_df)
+        "arrivals": get_not_existing_arrivals(conn, arrival_df),
+        "updated_arrivals": get_updated_arrivals(conn, arrival_df)
     }
 
     logger.info("Transformed all data.")

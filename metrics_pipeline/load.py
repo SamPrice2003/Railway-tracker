@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     conn = get_db_connection(ENV)
 
-    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST"]
+    station_crs_list = ["LST"]
 
     data = extract(ENV, station_crs_list)
 
