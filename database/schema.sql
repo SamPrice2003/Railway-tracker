@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS arrival (
     scheduled_time TIME,
     actual_time TIME,
     platform_changed BOOLEAN,
+    location_cancelled BOOLEAN,
     arrival_station_id INT,
     service_id INT NOT NULL,
     FOREIGN KEY (arrival_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
@@ -66,8 +67,7 @@ CREATE TABLE IF NOT EXISTS service_assignment (
 
 CREATE TABLE IF NOT EXISTS customer (
     customer_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    customer_email VARCHAR NOT NULL,
-    subscription_id INT
+    customer_email VARCHAR NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS subscription (
