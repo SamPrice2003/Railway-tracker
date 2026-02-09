@@ -1,5 +1,7 @@
 """Script to generate railway metrics for today."""
 
+# pylint: disable=consider-using-f-string,redefined-outer-name
+
 from os import environ as ENV, _Environ
 from logging import getLogger, basicConfig, INFO
 

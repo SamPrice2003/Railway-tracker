@@ -1,5 +1,7 @@
 """Script for generating the HTML contents report for the PDF using metrics.py."""
 
+# pylint: disable=line-too-long
+
 from os import environ as ENV
 
 from dotenv import load_dotenv
@@ -125,4 +127,4 @@ arriving at {most_delayed_service["arrival_station_name"]} with a delay of {most
 if __name__ == "__main__":
 
     with open("report.html", "w") as f:
-        f.write(generate_report_html(conn))
+        f.write(generate_report_html())
