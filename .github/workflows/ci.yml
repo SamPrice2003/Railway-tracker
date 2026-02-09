@@ -12,7 +12,7 @@ jobs:
     name: "Status"
     runs-on: ubuntu-latest
     steps:
-      - name: "Initialising"
+      - name: Initialising
         run: echo "Initialising"
 
   testing:
@@ -20,11 +20,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Install requirements
         run: |
-          pip install -r requirements.txt
+          for req in $(find . -name requirements.txt); do
+            echo "Installing $req"
+            pip install -r "$req"
+          done
           pip install pytest
 
       - name: Run tests
@@ -35,11 +41,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Install requirements
         run: |
-          pip install -r requirements.txt
+          for req in $(find . -name requirements.txt); do
+            echo "Installing $req"
+            pip install -r "$req"
+          done
           pip install pylint
 
       - name: Run Pylint
