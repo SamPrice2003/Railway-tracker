@@ -14,6 +14,8 @@ from dotenv import load_dotenv
 from xhtml2pdf import pisa
 import boto3
 
+from report_html import generate_report_html
+
 logger = getLogger(__name__)
 basicConfig(level=INFO)
 
@@ -39,8 +41,8 @@ def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
             dest=f)
 
 
-def create_report(source_html: str) -> None:
-    """Saves a PDF summary report, appending the source HTML into the PDF."""
+def create_report() -> None:
+    """Saves a PDF summary report based on database metrics."""
 
     today = datetime.strftime(TODAY, "%Y/%m/%d")
 
@@ -49,7 +51,7 @@ def create_report(source_html: str) -> None:
         <img width=100 height=100 align="right" src="{LOGO_SRC}">
         <h1 align="center" style="font-size: 30px">{today} - Summary Report for National Rail</h1>
     </div>
-    ''' + source_html
+    ''' + generate_report_html()
 
     convert_html_to_pdf(template, generate_report_filename())
 
@@ -113,8 +115,7 @@ def handler(event=None, context=None):
 
     load_dotenv()
 
-    # Insert source HTML for report data via another script
-    create_report("")
+    create_report()
 
     send_email(ENV, loads(event)["destination_emails"])
 
