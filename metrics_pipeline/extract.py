@@ -1,4 +1,6 @@
-""" The extract script responsible for extracting static data from the RTT api """
+"""The extract script responsible for extracting static data from the RTT API"""
+
+# pylint: disable=unused-argument, redefined-outer-name
 
 from os import environ as ENV, _Environ
 import json
@@ -127,7 +129,8 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
                 (arrival_date + actual_arrival), "%Y-%m-%d%H%M")
         else:
             arrival_dict["actual_arr_time"] = None
-        arrival_dict["platform_changed"] = arrival.get("platformChanged")
+        arrival_dict["platform_changed"] = arrival.get(
+            "platformChanged", False)
         arrival_dict["service_uid"] = service["service_uid"]
 
         service_arrival_details.append(arrival_dict)
@@ -156,7 +159,6 @@ def extract(config: _Environ, station_crs_list: list[str]) -> dict:
             station_crs=crs, session=session))
         logger.info(f"Retrieved service details for {crs}")
 
-    # service_details_list = list(set(service_details_list))
     service_details_list = list({frozenset(d.items())
                                 for d in service_details_list})
     service_details_list = [dict(f) for f in service_details_list]
@@ -186,4 +188,4 @@ if __name__ == "__main__":
 
     chosen_stations = ["LBG", "STP", "KGX", "SHF", "LST"]
 
-    DATA = extract(ENV, chosen_stations)
+    data = extract(ENV, chosen_stations)
