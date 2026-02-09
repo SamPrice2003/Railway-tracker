@@ -1,6 +1,8 @@
 """The transform script which takes extracted data \
     from the RTT API and transforms it, ready to load into RDS."""
 
+# pylint: disable=unused-argument, redefined-outer-name
+
 from logging import getLogger, basicConfig, INFO
 from os import environ as ENV, _Environ
 
@@ -127,6 +129,9 @@ def transform(config: _Environ, data: dict, conn: connection) -> dict:
 
     service_df = assign_operator_id_to_service(service_df, db_operator_ids)
     logger.info("Assigned operator ids to services")
+
+    service_df = service_df[[
+        "service_uid", "origin_station_id", "destination_station_id", "operator_id"]]
 
     arrival_df = assign_station_id_to_arrival(arrival_df, db_station_ids)
     logger.info("Assigned operator ids to arrivals")
