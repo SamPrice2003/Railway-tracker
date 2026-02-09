@@ -4,10 +4,14 @@ from os import environ as ENV
 from time import sleep
 from datetime import datetime
 from re import sub, split
+from logging import getLogger, basicConfig, INFO
 
 from dotenv import load_dotenv
 
 from extract import get_stomp_listener
+
+logger = getLogger(__name__)
+basicConfig(level=INFO)
 
 
 def get_services_affected(services_str: str) -> list[dict]:
@@ -41,8 +45,9 @@ def get_corrected_types(message: dict) -> dict:
     typed_message["incident_start"] = datetime.fromisoformat(
         message["incident_start"])
 
-    typed_message["incident_end"] = datetime.fromisoformat(
-        message["incident_end"])
+    if message.get("incident_end"):
+        typed_message["incident_end"] = datetime.fromisoformat(
+            message["incident_end"])
 
     if message["planned"].lower() == "true":
         typed_message["planned"] = True
@@ -87,9 +92,13 @@ def get_transformed_message(message: dict) -> dict:
     """Returns the transformed message as a dict with relevant columns for the database.
     Cleans data values and applies formatting."""
 
+    logger.info("Started transformation of incident data.")
+
     filtered_message = get_filtered_message(message.copy())
 
     transformed_message = get_corrected_types(filtered_message)
+
+    logger.info("Finished transformation of incident data.")
 
     return transformed_message
 
