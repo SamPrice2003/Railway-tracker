@@ -33,13 +33,10 @@ def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
     """Converts a HTML template to PDF and saves it under the specified name.
     Returns whether the conversion and saving was successful."""
 
-    result_file = open(output_filename, "w+b")
-
+    with open(output_filename, "w+b") as f:
     pisa.CreatePDF(
-        source_html,
-        dest=result_file)
-
-    result_file.close()
+            source_html,
+            dest=f)
 
 
 def create_report(source_html: str) -> None:
