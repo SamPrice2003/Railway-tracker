@@ -1,19 +1,11 @@
 """The combined pipeline script for the docker image."""
 
+# pylint: disable=unused-argument
 
-from logging import getLogger, basicConfig, INFO
-from os import environ as ENV, _Environ, remove, path
-import json
-from datetime import datetime
-import requests
-from requests.auth import HTTPBasicAuth
+from logging import getLogger, INFO
+from os import environ as ENV
 
 from dotenv import load_dotenv
-import pandas as pd
-
-from psycopg2 import connect
-from psycopg2.extensions import connection
-from psycopg2.extras import RealDictCursor
 
 from extract import extract
 from transform import transform, get_db_connection

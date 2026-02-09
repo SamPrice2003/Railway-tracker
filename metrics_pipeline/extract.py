@@ -108,8 +108,7 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
 
     today = datetime.now()
 
-    # rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}/{today.year}/{today.month:02d}/{today.day:02d}"
-    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}/2026/02/09"
+    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}/{today.year}/{today.month:02d}/{today.day:02d}"
 
     response = session.get(url=rtt_url).json()
 
