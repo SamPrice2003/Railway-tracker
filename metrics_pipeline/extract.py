@@ -108,15 +108,23 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
 
     today = datetime.now()
 
-    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}/{today.year}/{today.month:02d}/{today.day:02d}"
+    # rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}/{today.year}/{today.month:02d}/{today.day:02d}"
+    rtt_url = f"https://api.rtt.io/api/v1/json/service/{service['service_uid']}/2026/02/09"
 
     response = session.get(url=rtt_url).json()
+
+    if response.get("error"):
+        return []
 
     service_arrival_details = []
 
     arrival_date = response["runDate"]
 
     for arrival in response["locations"]:
+
+        if "crs" not in arrival:
+            continue
+
         arrival_dict = {}
         booked_arrival_time = arrival.get("gbttBookedArrival")
         actual_arrival_time = arrival.get("realtimeArrival")
@@ -135,6 +143,10 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
             arrival_date, "%Y-%m-%d")
         arrival_dict["platform_changed"] = arrival.get(
             "platformChanged", False)
+        if not arrival.get("cancelReasonCode"):
+            arrival_dict["location_cancelled"] = False
+        else:
+            arrival_dict["location_cancelled"] = True
         arrival_dict["service_uid"] = service["service_uid"]
 
         service_arrival_details.append(arrival_dict)
@@ -172,9 +184,12 @@ def extract(config: _Environ, station_crs_list: list[str]) -> dict:
     arrival_details_list = []
 
     # get the arrival details for each location each service visits
-    for service in service_details_list:
-        arrival_details_list.extend(get_service_arrival_details(
-            session=session, service=service))
+    for service in service_details_list.copy():
+        details = get_service_arrival_details(session, service)
+        if len(details) != 0:
+            arrival_details_list.extend(details)
+        else:
+            service_details_list.remove(service)
     logger.info("Retrieved arrival details for the services")
 
     session.close()

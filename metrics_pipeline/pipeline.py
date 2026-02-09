@@ -31,7 +31,7 @@ def handler(event=None, context=None):
 
     conn = get_db_connection(ENV)
 
-    chosen_stations = ["LBG", "STP", "KGX", "SHF", "LST"]
+    chosen_stations = ["LBG", "STP", "KGX", "SHF", "LST", "WFJ"]
     extracted_data = extract(ENV, chosen_stations)
     transformed_data = transform(ENV, extracted_data, conn)
 

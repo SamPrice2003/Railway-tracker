@@ -108,6 +108,9 @@ def transform(config: _Environ, data: dict, conn: connection) -> dict:
 
     basicConfig(level=INFO)
 
+    if not data["services"]:
+        return {"services": pd.DataFrame(), "arrivals": pd.DataFrame()}
+
     service_df = pd.DataFrame(data["services"])
     logger.info("Converted services to DataFrame")
     arrival_df = pd.DataFrame(data["arrivals"])

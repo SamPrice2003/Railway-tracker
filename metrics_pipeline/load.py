@@ -47,6 +47,7 @@ def create_arrival_staging_table(conn: connection) -> None:
                     scheduled_time TIME,
                     actual_time TIME,
                     platform_changed BOOLEAN,
+                    location_cancelled BOOLEAN,
                     arrival_station_id INT,
                     service_id INT,
                     CONSTRAINT unique_key UNIQUE (arrival_date, arrival_station_id, service_id));
@@ -93,6 +94,7 @@ def upload_arrival_staging_data(df: pd.DataFrame, conn: connection) -> None:
                                      scheduled_time,
                                      actual_time,
                                      platform_changed,
+                                     location_cancelled,
                                      arrival_station_id,
                                      service_id)
                             FROM STDIN
@@ -155,23 +157,28 @@ def merge_arrival_tables(conn: connection) -> None:
                         OR
                         A.actual_time IS DISTINCT FROM S.actual_time
                         OR
-                        A.platform_changed IS DISTINCT FROM S.platform_changed)
+                        A.platform_changed IS DISTINCT FROM S.platform_changed
+                        OR
+                        A.location_cancelled IS DISTINCT FROM S.location_cancelled)
                     THEN 
                         UPDATE SET
                             scheduled_time = S.scheduled_time,
                             actual_time = S.actual_time,
-                            platform_changed = S.platform_changed
+                            platform_changed = S.platform_changed,
+                            location_cancelled = S.location_cancelled
                     WHEN NOT MATCHED THEN
                         INSERT (arrival_date,
                                 scheduled_time,
                                 actual_time,
                                 platform_changed,
+                                location_cancelled,
                                 arrival_station_id,
                                 service_id)
                         VALUES (S.arrival_date,
                                 S.scheduled_time,
                                 S.actual_time,
                                 S.platform_changed,
+                                S.location_cancelled,
                                 S.arrival_station_id,
                                 S.service_id);
                     """)
@@ -220,6 +227,10 @@ def get_service_id_dict(service_id_list: list) -> pd.DataFrame:
 def load(config: _Environ, conn: connection, transformed_data: dict) -> None:
     """Loads the API data into the database."""
 
+    if transformed_data["services"].empty or transformed_data["arrivals"].empty:
+        logger.info("No data for the date provided. Skipping")
+        return
+
     service_data = transformed_data["services"]
     arrivals_data = transformed_data["arrivals"]
 
@@ -238,6 +249,7 @@ def load(config: _Environ, conn: connection, transformed_data: dict) -> None:
         "scheduled_arr_time",
         "actual_arr_time",
         "platform_changed",
+        "location_cancelled",
         "arrival_station_id",
         "service_id"]]
 
@@ -255,7 +267,7 @@ if __name__ == "__main__":
 
     conn = get_db_connection(ENV)
 
-    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST"]
+    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST", "WFJ"]
 
     data = extract(ENV, station_crs_list)
 
