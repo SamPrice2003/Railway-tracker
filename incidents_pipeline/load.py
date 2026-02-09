@@ -43,10 +43,8 @@ def get_service_id(conn: connection, origin_station: str, destination_station: s
             JOIN station OS
                 ON S.origin_station_id = OS.station_id
             JOIN station DS
-                ON S.destination_station_id = OS.station_id
-            JOIN operator O
-                ON S.operator_id = O.operator_id
-            WHERE OS.station_name = '{0}' AND DS.station_name = '{1}'
+                ON S.destination_station_id = DS.station_id
+            WHERE OS.station_name LIKE {0} AND DS.station_name LIKE {1} OR OS.station_name LIKE {1} AND DS.station_name LIKE {0}
             ;
             """).format(
             sql.Literal(origin_station),
@@ -87,7 +85,7 @@ def upload_incident_data(conn: connection, incident_data: dict) -> int:
     data = incident_data.copy()
 
     del data["services_affected"]
-    del data["operator"]
+    del data["operators"]
 
     with conn.cursor() as cur:
 
@@ -99,12 +97,12 @@ def upload_incident_data(conn: connection, incident_data: dict) -> int:
             ;
             """).format(
                 sql.SQL(", ").join(
-                    map(lambda col: sql.Identifier(col), incident_data.keys())),
+                    map(lambda col: sql.Identifier(col), data.keys())),
                 sql.SQL(", ").join(
-                    map(lambda val: sql.Identifier(val), incident_data.values()))
+                    map(lambda val: sql.Literal(val), data.values()))
         ))
 
-        incident_id = cur.fetchone()
+        incident_id = cur.fetchone()["incident_id"]
 
     conn.commit()
 
