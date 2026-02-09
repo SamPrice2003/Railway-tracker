@@ -20,6 +20,10 @@ def create_service_staging_table(conn: connection) -> None:
 
     with conn.cursor() as cur:
         cur.execute("""
+                    DROP TABLE IF EXISTS service_staging;
+                    """)
+
+        cur.execute("""
                     CREATE TABLE IF NOT EXISTS service_staging (
                     service_uid VARCHAR(6),
                     origin_station_id INT,
@@ -33,6 +37,10 @@ def create_arrival_staging_table(conn: connection) -> None:
     """Creates a temporary staging table for the new arrival data."""
 
     with conn.cursor() as cur:
+        cur.execute("""
+                    DROP TABLE IF EXISTS arrival_staging;
+                    """)
+
         cur.execute("""
                     CREATE TABLE IF NOT EXISTS arrival_staging (
                     scheduled_time TIMESTAMP,
@@ -65,7 +73,7 @@ def upload_service_staging_data(df: pd.DataFrame, conn: connection) -> None:
     if path.exists("./temp.csv"):
         remove("./temp.csv")
 
-    logger.info("Uploaded service staging data.")
+    logger.info("Uploaded service staging data")
 
 
 def upload_arrival_staging_data(df: pd.DataFrame, conn: connection) -> None:
@@ -132,7 +140,13 @@ def merge_arrival_tables(conn: connection) -> None:
     with conn.cursor() as cur:
         cur.execute("""
                     MERGE INTO arrival AS A
-                    USING arrival_staging AS S
+                    USING (
+                        SELECT *
+                        FROM arrival_staging
+                        WHERE scheduled_time IS NOT NULL
+                        AND arrival_station_id IS NOT NULL
+                        AND service_id IS NOT NULL
+                    ) AS S
                     ON A.scheduled_time = S.scheduled_time
                     AND A.arrival_station_id = S.arrival_station_id
                     AND A.service_id = S.service_id
