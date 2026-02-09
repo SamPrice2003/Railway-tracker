@@ -62,16 +62,22 @@ def upload_service_assignment_data(conn: connection, incident_data: dict) -> Non
 
     data = incident_data.copy()
 
-    data["services_affected"] = [(get_service_id(
-        conn, service["origin_station"], service["destination_station"]), data["incident_id"]) for service in data["services_affected"]]
+    service_values = []
 
-    with conn.cursor() as cur:
+    for service in data["services_affected"]:
+        service_id = get_service_id(
+            conn, service["origin_station"], service["destination_station"])
 
-        execute_values(cur, """
-                       INSERT INTO service_assignment (service_id, incident_id)
-                       VALUES %s
-                       ;
-                       """, data["services_affected"])
+        if service_id:
+            service_values.append((service_id, data["incident_id"]))
+
+    if len(service_values) != 0:
+        with conn.cursor() as cur:
+            execute_values(cur, """
+                        INSERT INTO service_assignment (service_id, incident_id)
+                        VALUES %s
+                        ;
+                        """, service_values)
 
     logger.info("Finished uploading service assignment data to RDS database.")
 
