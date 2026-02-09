@@ -33,7 +33,6 @@ def handler(event=None, context=None):
 
     chosen_stations = ["LBG", "STP", "KGX", "SHF", "LST"]
     extracted_data = extract(ENV, chosen_stations)
-    print(extracted_data["services"])
     transformed_data = transform(ENV, extracted_data, conn)
 
     load(ENV, conn, transformed_data)

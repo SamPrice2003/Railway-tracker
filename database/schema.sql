@@ -37,13 +37,14 @@ CREATE TABLE IF NOT EXISTS service (
 
 CREATE TABLE IF NOT EXISTS arrival (
     arrival_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    scheduled_time TIMESTAMP,
-    actual_time TIMESTAMP,
+    arrival_date DATE,
+    scheduled_time TIME,
+    actual_time TIME,
     platform_changed BOOLEAN,
     arrival_station_id INT,
     service_id INT NOT NULL,
     FOREIGN KEY (arrival_station_id) REFERENCES station(station_id) ON DELETE CASCADE,
-    FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE,
+    FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS incident (
@@ -55,18 +56,7 @@ CREATE TABLE IF NOT EXISTS incident (
     planned BOOLEAN NOT NULL
 );
 
-<<<<<<< 76-create-new-subscriber-table
-=======
-CREATE TABLE IF NOT EXISTS incident_assignment (
-    incident_assignment_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    incident_id INT NOT NULL,
-    operator_id INT NOT NULL,
-    FOREIGN KEY (incident_id) REFERENCES incident(incident_id) ON DELETE CASCADE,
-    FOREIGN KEY (operator_id) REFERENCES operator(operator_id) ON DELETE CASCADE
-);
-
->>>>>>> main
-CREATE TABLE service_assignment (
+CREATE TABLE IF NOT EXISTS service_assignment (
     service_assignment_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     service_id INT NOT NULL,
     incident_id INT NOT NULL,
@@ -74,13 +64,13 @@ CREATE TABLE service_assignment (
     FOREIGN KEY (incident_id) REFERENCES incident(incident_id) ON DELETE CASCADE
 );
 
-CREATE TABLE customer (
+CREATE TABLE IF NOT EXISTS customer (
     customer_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     customer_email VARCHAR NOT NULL,
     subscription_id INT
 );
 
-CREATE TABLE subscription (
+CREATE TABLE IF NOT EXISTS subscription (
     subscription_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     station_id INT NOT NULL,
     customer_id INT NOT NULL,

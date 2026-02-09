@@ -84,8 +84,10 @@ def get_service_details(session: requests.Session,
     response = session.get(url=rtt_url).json()
 
     service_list = []
-
     for service in response["services"]:
+
+        if service["atocName"] == "Eurostar":
+            continue
 
         service_dict = {}
 
@@ -116,19 +118,21 @@ def get_service_arrival_details(session: requests.Session, service: dict) -> lis
 
     for arrival in response["locations"]:
         arrival_dict = {}
-        booked_arrival = arrival.get("gbttBookedArrival")
-        actual_arrival = arrival.get("realtimeArrival")
+        booked_arrival_time = arrival.get("gbttBookedArrival")
+        actual_arrival_time = arrival.get("realtimeArrival")
         arrival_dict["crs"] = arrival["crs"]
-        if booked_arrival:
+        if booked_arrival_time:
             arrival_dict["scheduled_arr_time"] = datetime.strptime(
-                (arrival_date + booked_arrival), "%Y-%m-%d%H%M")
+                (booked_arrival_time), "%H%M")
         else:
             arrival_dict["scheduled_arr_time"] = None
-        if actual_arrival:
+        if actual_arrival_time:
             arrival_dict["actual_arr_time"] = datetime.strptime(
-                (arrival_date + actual_arrival), "%Y-%m-%d%H%M")
+                (actual_arrival_time), "%H%M")
         else:
             arrival_dict["actual_arr_time"] = None
+        arrival_dict["arrival_date"] = datetime.strptime(
+            arrival_date, "%Y-%m-%d")
         arrival_dict["platform_changed"] = arrival.get(
             "platformChanged", False)
         arrival_dict["service_uid"] = service["service_uid"]

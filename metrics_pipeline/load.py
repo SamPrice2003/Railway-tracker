@@ -43,11 +43,13 @@ def create_arrival_staging_table(conn: connection) -> None:
 
         cur.execute("""
                     CREATE TABLE IF NOT EXISTS arrival_staging (
-                    scheduled_time TIMESTAMP,
-                    actual_time TIMESTAMP,
+                    arrival_date DATE,
+                    scheduled_time TIME,
+                    actual_time TIME,
                     platform_changed BOOLEAN,
                     arrival_station_id INT,
-                    service_id INT);
+                    service_id INT,
+                    CONSTRAINT unique_key UNIQUE (arrival_date, arrival_station_id, service_id));
                     """)
 
     logger.info("Created arrival staging table")
@@ -79,12 +81,16 @@ def upload_service_staging_data(df: pd.DataFrame, conn: connection) -> None:
 def upload_arrival_staging_data(df: pd.DataFrame, conn: connection) -> None:
     """Uploads the arrival data to the staging arrival table in RDS."""
 
+    df = df.drop_duplicates(
+        ["arrival_date", "arrival_station_id", "service_id"], keep="first")
+
     df.to_csv("./temp.csv", index=False)
 
     with conn.cursor() as cur:
         with open("./temp.csv", "r", encoding="utf-8") as f:
             cur.copy_expert("""COPY arrival_staging
-                                    (scheduled_time,
+                                    (arrival_date,
+                                     scheduled_time,
                                      actual_time,
                                      platform_changed,
                                      arrival_station_id,
@@ -140,31 +146,30 @@ def merge_arrival_tables(conn: connection) -> None:
     with conn.cursor() as cur:
         cur.execute("""
                     MERGE INTO arrival AS A
-                    USING (
-                        SELECT *
-                        FROM arrival_staging
-                        WHERE scheduled_time IS NOT NULL
-                        AND arrival_station_id IS NOT NULL
-                        AND service_id IS NOT NULL
-                    ) AS S
-                    ON A.scheduled_time = S.scheduled_time
+                    USING arrival_staging AS S
+                    ON A.arrival_date = S.arrival_date
                     AND A.arrival_station_id = S.arrival_station_id
                     AND A.service_id = S.service_id
                     WHEN MATCHED AND (
+                        A.scheduled_time IS DISTINCT FROM S.scheduled_time
+                        OR
                         A.actual_time IS DISTINCT FROM S.actual_time
                         OR
                         A.platform_changed IS DISTINCT FROM S.platform_changed)
                     THEN 
                         UPDATE SET
+                            scheduled_time = S.scheduled_time,
                             actual_time = S.actual_time,
                             platform_changed = S.platform_changed
                     WHEN NOT MATCHED THEN
-                        INSERT (scheduled_time,
+                        INSERT (arrival_date,
+                                scheduled_time,
                                 actual_time,
                                 platform_changed,
                                 arrival_station_id,
                                 service_id)
-                        VALUES (S.scheduled_time,
+                        VALUES (S.arrival_date,
+                                S.scheduled_time,
                                 S.actual_time,
                                 S.platform_changed,
                                 S.arrival_station_id,
@@ -185,6 +190,7 @@ def remove_staging_table(conn: connection, table_name: str) -> None:
         cur.execute(f"""
                     DROP TABLE IF EXISTS {table_name}_staging;
                     """)
+        conn.commit()
     logger.info(f"Removed {table_name}_staging table")
 
 
@@ -211,10 +217,8 @@ def get_service_id_dict(service_id_list: list) -> pd.DataFrame:
     return service_id_dict
 
 
-def load(config: _Environ, conn: connection, data: dict) -> None:
+def load(config: _Environ, conn: connection, transformed_data: dict) -> None:
     """Loads the API data into the database."""
-
-    transformed_data = transform(ENV, data, conn)
 
     service_data = transformed_data["services"]
     arrivals_data = transformed_data["arrivals"]
@@ -230,6 +234,7 @@ def load(config: _Environ, conn: connection, data: dict) -> None:
     arrivals_data["service_id"] = arrivals_data["service_uid"].map(
         service_id_dict).astype("Int64")
     arrivals_data = arrivals_data[[
+        "arrival_date",
         "scheduled_arr_time",
         "actual_arr_time",
         "platform_changed",
@@ -254,4 +259,6 @@ if __name__ == "__main__":
 
     data = extract(ENV, station_crs_list)
 
-    load(ENV, conn, data)
+    transformed_data = transform(ENV, data, conn)
+
+    load(ENV, conn, transformed_data)
