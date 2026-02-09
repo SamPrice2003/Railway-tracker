@@ -1,11 +1,13 @@
--- Schema for the PostgreSQL database on AWS RDS
+-- Schema for the PostgreSQL database on AWS RDS.
 
-DROP TABLE IF EXISTS incident_assignment CASCADE;
+DROP TABLE IF EXISTS service_assignment CASCADE;
 DROP TABLE IF EXISTS incident CASCADE;
 DROP TABLE IF EXISTS arrival CASCADE;
 DROP TABLE IF EXISTS service CASCADE;
 DROP TABLE IF EXISTS operator CASCADE;
 DROP TABLE IF EXISTS station CASCADE;
+DROP TABLE IF EXISTS customer CASCADE;
+DROP TABLE IF EXISTS subscription CASCADE;
 
 
 CREATE TABLE IF NOT EXISTS station (
@@ -53,6 +55,8 @@ CREATE TABLE IF NOT EXISTS incident (
     planned BOOLEAN NOT NULL
 );
 
+<<<<<<< 76-create-new-subscriber-table
+=======
 CREATE TABLE IF NOT EXISTS incident_assignment (
     incident_assignment_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     incident_id INT NOT NULL,
@@ -61,12 +65,27 @@ CREATE TABLE IF NOT EXISTS incident_assignment (
     FOREIGN KEY (operator_id) REFERENCES operator(operator_id) ON DELETE CASCADE
 );
 
+>>>>>>> main
 CREATE TABLE service_assignment (
     service_assignment_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     service_id INT NOT NULL,
     incident_id INT NOT NULL,
     FOREIGN KEY (service_id) REFERENCES service(service_id) ON DELETE CASCADE,
     FOREIGN KEY (incident_id) REFERENCES incident(incident_id) ON DELETE CASCADE
+);
+
+CREATE TABLE customer (
+    customer_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    customer_email VARCHAR NOT NULL,
+    subscription_id INT
+);
+
+CREATE TABLE subscription (
+    subscription_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    station_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    FOREIGN KEY (station_id) REFERENCES station(station_id),
+    FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
 );
 
 \copy station(station_name, latitude, longitude, station_crs) from './crs.csv' WITH DELIMITER ',' CSV HEADER;
