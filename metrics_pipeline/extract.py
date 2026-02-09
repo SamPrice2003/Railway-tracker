@@ -1,5 +1,7 @@
 """The extract script responsible for extracting static data from the RTT API"""
 
+# pylint: disable=unused-argument, redefined-outer-name
+
 from os import environ as ENV, _Environ
 import json
 from logging import getLogger, basicConfig, INFO
