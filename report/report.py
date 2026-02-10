@@ -14,6 +14,8 @@ from dotenv import load_dotenv
 from xhtml2pdf import pisa
 import boto3
 
+from upload_to_s3 import get_s3_client, upload_to_s3
+
 logger = getLogger(__name__)
 basicConfig(level=INFO)
 
@@ -30,8 +32,7 @@ def generate_report_filename() -> str:
 
 
 def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
-    """Converts a HTML template to PDF and saves it under the specified name.
-    Returns whether the conversion and saving was successful."""
+    """Converts a HTML template to PDF and saves it under the specified name."""
 
     with open(output_filename, "w+b") as f:
         pisa.CreatePDF(
@@ -39,8 +40,9 @@ def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
             dest=f)
 
 
-def create_report(source_html: str) -> None:
-    """Saves a PDF summary report, appending the source HTML into the PDF."""
+def create_report(source_html: str) -> str:
+    """Saves a PDF summary report, appending the source HTML into the PDF.
+    Returns the file name of the PDF summary report saved."""
 
     today = datetime.strftime(TODAY, "%Y/%m/%d")
 
@@ -51,9 +53,13 @@ def create_report(source_html: str) -> None:
     </div>
     ''' + source_html
 
-    convert_html_to_pdf(template, generate_report_filename())
+    pdf_file = generate_report_filename()
+
+    convert_html_to_pdf(template, pdf_file)
 
     logger.info("Saved PDF summary report from HTML source.")
+
+    return pdf_file
 
 
 def delete_pdf_reports() -> None:
@@ -66,7 +72,7 @@ def delete_pdf_reports() -> None:
             remove(file)
 
 
-def send_email(config: _Environ, destination_emails: list[str]) -> None:
+def send_email(config: _Environ, destination_emails: list[str], pdf_file_name: str) -> None:
     """Sends an email attaching a PDF summary report to the destination emails.
     SOURCE_EMAIL must exist in the config."""
 
@@ -80,11 +86,9 @@ def send_email(config: _Environ, destination_emails: list[str]) -> None:
 
     message["Subject"] = f"Daily Summary Report for National Rail - {today}"
 
-    report_filename = generate_report_filename()
-
-    attachment = MIMEApplication(open(report_filename, "rb").read())
+    attachment = MIMEApplication(open(pdf_file_name, "rb").read())
     attachment.add_header("Content-Disposition",
-                          "attachment", filename=report_filename)
+                          "attachment", filename=pdf_file_name)
     message.attach(attachment)
 
     text = f"""
@@ -114,9 +118,11 @@ def handler(event=None, context=None):
     load_dotenv()
 
     # Insert source HTML for report data via another script
-    create_report("")
+    pdf_file = create_report("")
 
-    send_email(ENV, loads(event)["destination_emails"])
+    send_email(ENV, loads(event)["destination_emails"], pdf_file)
+
+    upload_to_s3(get_s3_client(ENV), pdf_file, ENV["S3_BUCKET_NAME"], pdf_file)
 
     delete_pdf_reports()
 
