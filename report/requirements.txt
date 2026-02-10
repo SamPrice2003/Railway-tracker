@@ -2,4 +2,3 @@ xhtml2pdf
 python-dotenv
 boto3
 psycopg2
-emval

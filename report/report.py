@@ -2,7 +2,6 @@
 and sending emails with the attached report."""
 
 from os import environ as ENV, _Environ, remove, listdir
-from json import loads, dumps
 from datetime import datetime
 from re import match
 from email.mime.multipart import MIMEMultipart
@@ -13,7 +12,6 @@ from logging import getLogger, basicConfig, INFO
 from dotenv import load_dotenv
 from xhtml2pdf import pisa
 import boto3
-from emval import validate_email
 
 from report_html import generate_report_html
 from upload_to_s3 import get_s3_client, upload_to_s3
