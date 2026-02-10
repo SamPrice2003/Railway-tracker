@@ -1,8 +1,9 @@
 """Script which runs the Incident Feed ETL pipeline continuously."""
 
 from os import environ as ENV
-from dotenv import load_dotenv
 from time import sleep
+
+from dotenv import load_dotenv
 
 from extract import get_stomp_listener
 from transform import get_transformed_message

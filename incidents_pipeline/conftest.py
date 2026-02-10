@@ -1,5 +1,7 @@
 """Test fixtures."""
 
+# pylint:skip-file
+
 import pytest
 
 

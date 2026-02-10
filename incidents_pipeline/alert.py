@@ -1,5 +1,7 @@
 """Script for sending an alert via SNS to subscribed users about incidents."""
 
+# pylint: disable=line-too-long,redefined-outer-name
+
 from os import environ as ENV, _Environ
 from time import sleep
 from datetime import datetime

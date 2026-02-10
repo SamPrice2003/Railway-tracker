@@ -1,5 +1,7 @@
 """Script which loads the transformed incident data into the RDS database."""
 
+# pylint: disable=redefined-outer-name,line-too-long
+
 from os import environ as ENV, _Environ
 from time import sleep
 
