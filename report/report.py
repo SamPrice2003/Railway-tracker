@@ -34,7 +34,7 @@ def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
     Returns whether the conversion and saving was successful."""
 
     with open(output_filename, "w+b") as f:
-    pisa.CreatePDF(
+        pisa.CreatePDF(
             source_html,
             dest=f)
 

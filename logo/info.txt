@@ -1,0 +1,14 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)
+font name: GlacialIndifference-Regular
+font link: https://hanken.co/product/hk-grotesk/
+font author: Hanken Design Co.
+font author site: https://hanken.co/
+Slogan Font: Questrial-Regular.otf
+
+icon designer: Pablo Barros da Silveira
+icon designer link: /creator/pablobarros/
+        
+{"bg":"#D2EAF5","icon-gradient-0":"#000A68","icon-gradient-1":"#00C4EE","font":"#022239","slogan":"#16364d"}
+      
