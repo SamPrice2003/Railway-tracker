@@ -10,6 +10,8 @@ COPY transform.py .
 
 COPY load.py .
 
+COPY alert.py .
+
 COPY pipeline.py .
 
 CMD ["python", "pipeline.py"]

@@ -2,7 +2,6 @@
 and sending emails with the attached report."""
 
 from os import environ as ENV, _Environ, remove, listdir
-from json import loads, dumps
 from datetime import datetime
 from re import match
 from email.mime.multipart import MIMEMultipart
@@ -16,6 +15,7 @@ import boto3
 
 from report_html import generate_report_html
 from upload_to_s3 import get_s3_client, upload_to_s3
+from metrics import get_db_connection
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)
@@ -73,6 +73,22 @@ def delete_pdf_reports() -> None:
             remove(file)
 
 
+def get_destination_emails(config: _Environ) -> list[str]:
+    """Returns a list of the destination emails for the PDF report."""
+
+    with get_db_connection(config).cursor() as cur:
+        cur.execute("""
+                    SELECT DISTINCT customer_email
+                    FROM customer
+                    JOIN subscription
+                        USING (customer_id)
+                    WHERE subscription_type LIKE '%%report%'
+                    ;
+                    """)
+
+        return [row["customer_email"] for row in cur.fetchall()]
+
+
 def send_email(config: _Environ, destination_emails: list[str], pdf_file_name: str) -> None:
     """Sends an email attaching a PDF summary report to the destination emails.
     SOURCE_EMAIL must exist in the config."""
@@ -117,10 +133,12 @@ def handler(event=None, context=None):
     Event expects a JSON-formatted string of all destination emails to send the report to."""
 
     load_dotenv()
-    
+
     pdf_file = create_report()
 
-    send_email(ENV, loads(event)["destination_emails"], pdf_file)
+    dest_emails = get_destination_emails(ENV)
+
+    send_email(ENV, dest_emails, pdf_file)
 
     upload_to_s3(get_s3_client(ENV), pdf_file, ENV["S3_BUCKET_NAME"], pdf_file)
 
@@ -131,6 +149,4 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    your_email = input("Enter your email: ")
-
-    handler(event=dumps({"destination_emails": [your_email]}))
+    handler()

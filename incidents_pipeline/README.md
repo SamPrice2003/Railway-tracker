@@ -17,8 +17,11 @@ DB_PORT=XXXX
 DB_NAME=XXXX
 DB_USERNAME=XXXX
 DB_PASSWORD=XXXX
+AWS_ACCESS_KEY=XXXX
+AWS_SECRET_KEY=XXXX
 AWS_REGION=XXXX
 AWS_ECR_REPO=XXXX
+SNS_TOPIC=XXXX
 ```
 
 The STOMP information can be found via registering for the [National Rail Data Portal](https://opendata.nationalrail.co.uk/feeds). It is located under the title "Knowledgebase (KB) Real Time Incidents".
@@ -30,7 +33,7 @@ The `AWS_ECR_REPO` is exactly the same as the repository that you have provided 
 
 ### Local Pipeline
 
-If you would like to run the pipeline to listen for incidents and add them to the `incident` table in the database continuously, run the following:
+If you would like to run the pipeline to listen for incidents, add them to the `incident` table in the database continuously, and publish new messages to SNS topic `SNS_TOPIC`, run the following:
 
 ```sh
 python pipeline.py
@@ -78,3 +81,13 @@ python load.py
 ```
 
 This script stops after a single upload is made.
+
+### Alert
+
+Running this script will wait for a new incident, add it to the `incident` table, then publish the incident to our `SNS_TOPIC` via SNS:
+
+```sh
+python alert.py
+```
+
+This script runs continuously.

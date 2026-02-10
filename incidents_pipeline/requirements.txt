@@ -4,3 +4,4 @@ xmltodict
 pytest
 pylint
 psycopg2
+boto3
