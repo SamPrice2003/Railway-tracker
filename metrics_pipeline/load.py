@@ -15,10 +15,23 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
+def get_tmp_path() -> str:
+    """Returns the path to the file depending on where 
+    this function is being ran (Lambda/local)."""
+
+    if ENV.get("AWS_LAMBDA_FUNCTION_NAME"):
+        return "/tmp/temp.csv"
+    return "./temp.csv"
+
+
 def create_service_staging_table(conn: connection) -> None:
     """Creates a temporary staging table for the new service data."""
 
     with conn.cursor() as cur:
+        cur.execute("""
+                    DROP TABLE IF EXISTS service_staging;
+                    """)
+
         cur.execute("""
                     CREATE TABLE IF NOT EXISTS service_staging (
                     service_uid VARCHAR(6),
@@ -34,12 +47,19 @@ def create_arrival_staging_table(conn: connection) -> None:
 
     with conn.cursor() as cur:
         cur.execute("""
+                    DROP TABLE IF EXISTS arrival_staging;
+                    """)
+
+        cur.execute("""
                     CREATE TABLE IF NOT EXISTS arrival_staging (
-                    scheduled_time TIMESTAMP,
-                    actual_time TIMESTAMP,
+                    arrival_date DATE,
+                    scheduled_time TIME,
+                    actual_time TIME,
                     platform_changed BOOLEAN,
+                    location_cancelled BOOLEAN,
                     arrival_station_id INT,
-                    service_id INT);
+                    service_id INT,
+                    CONSTRAINT unique_key UNIQUE (arrival_date, arrival_station_id, service_id));
                     """)
 
     logger.info("Created arrival staging table")
@@ -48,10 +68,12 @@ def create_arrival_staging_table(conn: connection) -> None:
 def upload_service_staging_data(df: pd.DataFrame, conn: connection) -> None:
     """Uploads the data to the staging service table in RDS."""
 
-    df.to_csv("./temp.csv", index=False)
+    csv_path = get_tmp_path()
+
+    df.to_csv(csv_path, index=False)
 
     with conn.cursor() as cur:
-        with open("./temp.csv", "r", encoding="utf-8") as f:
+        with open(csv_path, "r", encoding="utf-8") as f:
             cur.copy_expert("""COPY service_staging
                                     (service_uid,
                                      origin_station_id,
@@ -62,23 +84,30 @@ def upload_service_staging_data(df: pd.DataFrame, conn: connection) -> None:
 
         conn.commit()
 
-    if path.exists("./temp.csv"):
-        remove("./temp.csv")
+    if path.exists(csv_path):
+        remove(csv_path)
 
-    logger.info("Uploaded service staging data.")
+    logger.info("Uploaded service staging data")
 
 
 def upload_arrival_staging_data(df: pd.DataFrame, conn: connection) -> None:
     """Uploads the arrival data to the staging arrival table in RDS."""
 
-    df.to_csv("./temp.csv", index=False)
+    df = df.drop_duplicates(
+        ["arrival_date", "arrival_station_id", "service_id"], keep="first")
+
+    csv_path = get_tmp_path()
+
+    df.to_csv(csv_path, index=False)
 
     with conn.cursor() as cur:
-        with open("./temp.csv", "r", encoding="utf-8") as f:
+        with open(csv_path, "r", encoding="utf-8") as f:
             cur.copy_expert("""COPY arrival_staging
-                                    (scheduled_time,
+                                    (arrival_date,
+                                     scheduled_time,
                                      actual_time,
                                      platform_changed,
+                                     location_cancelled,
                                      arrival_station_id,
                                      service_id)
                             FROM STDIN
@@ -86,8 +115,8 @@ def upload_arrival_staging_data(df: pd.DataFrame, conn: connection) -> None:
 
         conn.commit()
 
-    if path.exists("./temp.csv"):
-        remove("./temp.csv")
+    if path.exists(csv_path):
+        remove(csv_path)
 
     logger.info("Uploaded arrival staging data.")
 
@@ -133,26 +162,36 @@ def merge_arrival_tables(conn: connection) -> None:
         cur.execute("""
                     MERGE INTO arrival AS A
                     USING arrival_staging AS S
-                    ON A.scheduled_time = S.scheduled_time
+                    ON A.arrival_date = S.arrival_date
                     AND A.arrival_station_id = S.arrival_station_id
                     AND A.service_id = S.service_id
                     WHEN MATCHED AND (
+                        A.scheduled_time IS DISTINCT FROM S.scheduled_time
+                        OR
                         A.actual_time IS DISTINCT FROM S.actual_time
                         OR
-                        A.platform_changed IS DISTINCT FROM S.platform_changed)
+                        A.platform_changed IS DISTINCT FROM S.platform_changed
+                        OR
+                        A.location_cancelled IS DISTINCT FROM S.location_cancelled)
                     THEN 
                         UPDATE SET
+                            scheduled_time = S.scheduled_time,
                             actual_time = S.actual_time,
-                            platform_changed = S.platform_changed
+                            platform_changed = S.platform_changed,
+                            location_cancelled = S.location_cancelled
                     WHEN NOT MATCHED THEN
-                        INSERT (scheduled_time,
+                        INSERT (arrival_date,
+                                scheduled_time,
                                 actual_time,
                                 platform_changed,
+                                location_cancelled,
                                 arrival_station_id,
                                 service_id)
-                        VALUES (S.scheduled_time,
+                        VALUES (S.arrival_date,
+                                S.scheduled_time,
                                 S.actual_time,
                                 S.platform_changed,
+                                S.location_cancelled,
                                 S.arrival_station_id,
                                 S.service_id);
                     """)
@@ -171,6 +210,7 @@ def remove_staging_table(conn: connection, table_name: str) -> None:
         cur.execute(f"""
                     DROP TABLE IF EXISTS {table_name}_staging;
                     """)
+        conn.commit()
     logger.info(f"Removed {table_name}_staging table")
 
 
@@ -197,10 +237,12 @@ def get_service_id_dict(service_id_list: list) -> pd.DataFrame:
     return service_id_dict
 
 
-def load(config: _Environ, conn: connection, data: dict) -> None:
+def load(config: _Environ, conn: connection, transformed_data: dict) -> None:
     """Loads the API data into the database."""
 
-    transformed_data = transform(ENV, data, conn)
+    if transformed_data["services"].empty or transformed_data["arrivals"].empty:
+        logger.info("No data for the date provided. Skipping")
+        return
 
     service_data = transformed_data["services"]
     arrivals_data = transformed_data["arrivals"]
@@ -216,9 +258,11 @@ def load(config: _Environ, conn: connection, data: dict) -> None:
     arrivals_data["service_id"] = arrivals_data["service_uid"].map(
         service_id_dict).astype("Int64")
     arrivals_data = arrivals_data[[
+        "arrival_date",
         "scheduled_arr_time",
         "actual_arr_time",
         "platform_changed",
+        "location_cancelled",
         "arrival_station_id",
         "service_id"]]
 
@@ -236,8 +280,10 @@ if __name__ == "__main__":
 
     conn = get_db_connection(ENV)
 
-    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST"]
+    station_crs_list = ["LBG", "STP", "KGX", "SHF", "LST", "WFJ"]
 
     data = extract(ENV, station_crs_list)
 
-    load(ENV, conn, data)
+    transformed_data = transform(ENV, data, conn)
+
+    load(ENV, conn, transformed_data)
