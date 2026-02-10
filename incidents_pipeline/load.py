@@ -134,7 +134,9 @@ if __name__ == "__main__":
 
     listener = get_stomp_listener(ENV)
 
-    while True:
+    message = None
+
+    while not message:
         message = listener.pop_message()
 
         if message:
@@ -142,3 +144,5 @@ if __name__ == "__main__":
             upload_data(conn, message)
 
         sleep(1)
+
+    logger.info("Loaded a single incident into the database table.")
