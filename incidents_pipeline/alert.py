@@ -141,7 +141,7 @@ Services affected include:
 def publish_incident(config: _Environ, sns_client: client, conn: connection, incident_id: int) -> None:
     """Publishes an incident to the SNS topic via the config."""
 
-    sns_topic_arn = get_sns_topic_arn(sns_client, config["INCIDENT_TOPIC"])
+    sns_topic_arn = get_sns_topic_arn(sns_client, config["SNS_TOPIC"])
 
     stations = get_stations_affected(conn, incident_id)
 
