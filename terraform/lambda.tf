@@ -63,12 +63,20 @@ resource "aws_iam_role_policy_attachment" "lambda_s3_attach" {
 resource "aws_lambda_function" "metrics" {
   function_name = "c21-railway-tracker-metrics-lambda"
   role          = aws_iam_role.lambda_exec_role.arn
-
   package_type = "Image"
   image_uri    = var.METRICS_LAMBDA_IMAGE_URI
+  timeout     = 300
+  memory_size = 512
 
-  timeout     = 60
-  memory_size = 256
+  environment {
+    variables = {
+      DB_USERNAME = var.DB_USERNAME
+      DB_PASSWORD = var.DB_PASSWORD
+      DB_HOST     = var.DB_HOST
+      DB_NAME     = var.DB_NAME
+      DB_PORT     = var.DB_PORT
+    }
+  }
 }
 
 ################### Lambda 2: Reporting/Archive ###################
@@ -76,11 +84,22 @@ resource "aws_lambda_function" "metrics" {
 resource "aws_lambda_function" "reports" {
    function_name = "c21-railway-tracker-reports-lambda"
   role          = aws_iam_role.lambda_exec_role.arn
-
   package_type = "Image"
   image_uri    = var.REPORTS_LAMBDA_IMAGE_URI
+  timeout     = 120
+  memory_size = 512
 
-  timeout     = 60
-  memory_size = 256
+  environment {
+    variables = {
+      S3_BUCKET_NAME = var.S3_BUCKET_NAME
+      AWS_ECR_REPO   = var.AWS_ECR_REPORT_REPO
+      SOURCE_EMAIL   = var.SOURCE_EMAIL
+      DB_USERNAME = var.DB_USERNAME
+      DB_PASSWORD = var.DB_PASSWORD
+      DB_HOST     = var.DB_HOST
+      DB_NAME     = var.DB_NAME
+      DB_PORT     = var.DB_PORT
+    }
+  }
 }
 

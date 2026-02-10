@@ -61,8 +61,7 @@ CLUSTER_NAME = "<your_aws_cluster_name>"
 AWS_ACCOUNT_ID = "<your_aws_account_id>"
 AWS_ACCESS_KEY_ID = "<your_aws_access_key_id>"
 AWS_SECRET_ACCESS_KEY = "<your_aws_secret_access_key>"
-
-PUBLIC_SUBNET_IDS = ["<your_aws_public_subnet_1>","<your_aws_public_subnet_2>"]
+AWS_ECR_REPORT_REPO = <"your_ecr_repo_name_for_the_report">
 
 LISTENER_IMAGE_URI  = "<your_ecr_uri>"
 DASHBOARD_IMAGE_URI = "<your_ecr_uri>"
@@ -78,6 +77,8 @@ DB_PORT     = "<your_db_port>"
 DB_NAME     = "<your_db_name>"
 DB_USERNAME = "<your_db_username>"
 DB_PASSWORD = "<your_db_password>"
+
+SOURCE_EMAIL = <"your_source_email">
 ```
 
 Notes:
