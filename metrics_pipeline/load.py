@@ -15,6 +15,15 @@ logger = getLogger(__name__)
 basicConfig(level=INFO)
 
 
+def get_tmp_path() -> str:
+    """Returns the path to the file depending on where 
+    this function is being ran (Lambda/local)."""
+
+    if ENV.get("AWS_LAMBDA_FUNCTION_NAME"):
+        return "/tmp/temp.csv"
+    return "./temp.csv"
+
+
 def create_service_staging_table(conn: connection) -> None:
     """Creates a temporary staging table for the new service data."""
 
@@ -59,10 +68,12 @@ def create_arrival_staging_table(conn: connection) -> None:
 def upload_service_staging_data(df: pd.DataFrame, conn: connection) -> None:
     """Uploads the data to the staging service table in RDS."""
 
-    df.to_csv("./temp.csv", index=False)
+    csv_path = get_tmp_path()
+
+    df.to_csv(csv_path, index=False)
 
     with conn.cursor() as cur:
-        with open("./temp.csv", "r", encoding="utf-8") as f:
+        with open(csv_path, "r", encoding="utf-8") as f:
             cur.copy_expert("""COPY service_staging
                                     (service_uid,
                                      origin_station_id,
@@ -73,8 +84,8 @@ def upload_service_staging_data(df: pd.DataFrame, conn: connection) -> None:
 
         conn.commit()
 
-    if path.exists("./temp.csv"):
-        remove("./temp.csv")
+    if path.exists(csv_path):
+        remove(csv_path)
 
     logger.info("Uploaded service staging data")
 
@@ -85,10 +96,12 @@ def upload_arrival_staging_data(df: pd.DataFrame, conn: connection) -> None:
     df = df.drop_duplicates(
         ["arrival_date", "arrival_station_id", "service_id"], keep="first")
 
-    df.to_csv("./temp.csv", index=False)
+    csv_path = get_tmp_path()
+
+    df.to_csv(csv_path, index=False)
 
     with conn.cursor() as cur:
-        with open("./temp.csv", "r", encoding="utf-8") as f:
+        with open(csv_path, "r", encoding="utf-8") as f:
             cur.copy_expert("""COPY arrival_staging
                                     (arrival_date,
                                      scheduled_time,
@@ -102,8 +115,8 @@ def upload_arrival_staging_data(df: pd.DataFrame, conn: connection) -> None:
 
         conn.commit()
 
-    if path.exists("./temp.csv"):
-        remove("./temp.csv")
+    if path.exists(csv_path):
+        remove(csv_path)
 
     logger.info("Uploaded arrival staging data.")
 
