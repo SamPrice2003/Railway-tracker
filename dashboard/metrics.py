@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from db import fetch_table
+from database_connection import fetch_dataframe
 
 
 def load_arrivals(lookback_days: int = 7) -> pd.DataFrame:
@@ -26,7 +26,7 @@ def load_arrivals(lookback_days: int = 7) -> pd.DataFrame:
         WHERE a.arrival_date >= CURRENT_DATE - (%s || ' days')::interval;
     """
 
-    return fetch_table(sql, values=(days,))
+    return fetch_dataframe(sql, values=(days,))
 
 
 def get_kpi_numbers(arrivals_df: pd.DataFrame, delay_limit_mins: int = 5) -> dict:

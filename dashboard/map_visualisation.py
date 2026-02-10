@@ -5,11 +5,10 @@ from datetime import date
 import folium
 import pandas as pd
 
-from db import fetch_table
+from database_connection import fetch_dataframe
 
-MAP_TILES = "CartoDB positron"
-UK_CENTER = (54.5, -2.5)
-DEFAULT_ZOOM = 6
+UK_center_coordinates = (54.5, -2.5)
+
 
 STATIONS_SQL = """
     SELECT
@@ -39,12 +38,12 @@ ARRIVALS_FOR_DAY_SQL = """
 
 def load_stations() -> pd.DataFrame:
     """Load station details from the database."""
-    return fetch_table(STATIONS_SQL)
+    return fetch_dataframe(STATIONS_SQL)
 
 
 def load_arrivals_for_day(chosen_day: date) -> pd.DataFrame:
     """Load arrivals for a single day and calculate delay minutes."""
-    rows = fetch_table(ARRIVALS_FOR_DAY_SQL, values=(chosen_day,))
+    rows = fetch_dataframe(ARRIVALS_FOR_DAY_SQL, values=(chosen_day,))
     if rows is None or rows.empty:
         return pd.DataFrame()
 
@@ -131,7 +130,7 @@ def pick_map_center(stations: pd.DataFrame, lateness: pd.DataFrame) -> tuple[flo
     if not base.empty:
         return float(base["latitude"].mean()), float(base["longitude"].mean())
 
-    return UK_CENTER
+    return UK_center_coordinates
 
 
 def build_map(stations: pd.DataFrame, lateness: pd.DataFrame) -> folium.Map:
@@ -140,8 +139,8 @@ def build_map(stations: pd.DataFrame, lateness: pd.DataFrame) -> folium.Map:
 
     map_obj = folium.Map(
         location=[center_lat, center_lon],
-        zoom_start=DEFAULT_ZOOM,
-        tiles=MAP_TILES,
+        zoom_start=6,
+        tiles="CartoDB positron",
     )
 
     if lateness is None or lateness.empty:
@@ -172,21 +171,20 @@ def build_map(stations: pd.DataFrame, lateness: pd.DataFrame) -> folium.Map:
     return map_obj
 
 
-def main() -> None:
-    """Build a test HTML map for today and save it locally."""
-    stations = load_stations()
-    arrivals = load_arrivals_for_day(date.today())
-    if arrivals.empty:
-        print("No arrivals found for today.")
-        return
+# def main() -> None:
+#     """Build a test HTML map for today and save it locally."""
+#     stations = load_stations()
+#     arrivals = load_arrivals_for_day(date.today())
+#     if arrivals.empty:
+#         print("No arrivals found for today.")
+#         return
 
-    arrivals = arrivals.copy()
-    arrivals["is_late"] = arrivals["delay_minutes"] >= 2
+#     arrivals = arrivals.copy()
+#     arrivals["is_late"] = arrivals["delay_minutes"] >= 2
 
-    lateness = build_station_lateness(stations, arrivals)
-    map_obj = build_map(stations, lateness)
-    map_obj.save("station_lateness_map.html")
-
+#     lateness = build_station_lateness(stations, arrivals)
+#     map_obj = build_map(stations, lateness)
+#     map_obj.save("/temp/station_lateness_map.html")
 
 if __name__ == "__main__":
-    main()
+  ...

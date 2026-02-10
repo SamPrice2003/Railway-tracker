@@ -2,10 +2,12 @@
 
 import pandas as pd
 
-from db import fetch_table
+from database_connection import fetch_dataframe
 
 
-STATIONS_WITH_COORDS_SQL = """
+def load_stations_with_coords() -> pd.DataFrame:
+    """Load stations that have valid latitude and longitude values."""
+    stations = fetch_dataframe("""
     SELECT
         station_id,
         station_name,
@@ -15,12 +17,7 @@ STATIONS_WITH_COORDS_SQL = """
     FROM station
     WHERE latitude IS NOT NULL
       AND longitude IS NOT NULL;
-"""
-
-
-def load_stations_with_coords() -> pd.DataFrame:
-    """Load stations that have valid latitude and longitude values."""
-    stations = fetch_table(STATIONS_WITH_COORDS_SQL)
+""")
     if stations is None:
         return pd.DataFrame()
     return stations

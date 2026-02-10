@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from db import fetch_table
+from database_connection import fetch_dataframe
 
 
 INCIDENTS_SQL = """
@@ -57,7 +57,7 @@ def show_blue_heading(text: str) -> None:
     st.markdown(f"<h3 class='ss-blue'>{text}</h3>", unsafe_allow_html=True)
 
 
-def to_bool(values: pd.Series | None) -> pd.Series:
+def to_bool(values: pd.Series) -> pd.Series:
     """Turn a column into boolean values in a safe way."""
     if values is None:
         return pd.Series(dtype="boolean")
@@ -65,14 +65,14 @@ def to_bool(values: pd.Series | None) -> pd.Series:
     if str(values.dtype).lower() in {"bool", "boolean"}:
         return values.astype("boolean")
 
-    as_text = values.astype("string").str.strip().str.lower()
-    yes_values = {"true", "t", "1", "yes"}
-    return as_text.map(lambda item: item in yes_values).astype("boolean")
+    cleaned = values.astype("string").str.strip().str.lower()
+    return cleaned.isin(["true", "t", "1", "yes"]).astype("boolean")
+
 
 
 def load_incident_rows() -> pd.DataFrame:
     """Load incidents and add a few extra columns used by the page."""
-    data = fetch_table(INCIDENTS_SQL)
+    data = fetch_dataframe(INCIDENTS_SQL)
     if data is None or data.empty:
         return pd.DataFrame()
 
@@ -96,7 +96,7 @@ def load_incident_rows() -> pd.DataFrame:
 
 def load_users_affected() -> tuple[int, int]:
     """Load estimated impacted users and subscribed stations for active incidents."""
-    data = fetch_table(USERS_AFFECTED_SQL)
+    data = fetch_dataframe(USERS_AFFECTED_SQL)
     if data is None or data.empty:
         return 0, 0
 

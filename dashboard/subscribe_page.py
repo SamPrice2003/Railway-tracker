@@ -1,11 +1,12 @@
 """Subscribe page where a user can sign up for station alerts."""
+# pylint: disable=broad-exception-caught
 
 import re
 
 import pandas as pd
 import streamlit as st
 
-from db import fetch_table, run_change
+from database_connection import fetch_dataframe, run_change
 
 STATIONS_SQL = """
     SELECT
@@ -46,7 +47,7 @@ def is_valid_email(email: str) -> bool:
 @st.cache_data(ttl=300)
 def load_station_list() -> pd.DataFrame:
     """Load stations for the dropdown and cache for a short time."""
-    stations = fetch_table(STATIONS_SQL)
+    stations = fetch_dataframe(STATIONS_SQL)
     if stations is None or stations.empty:
         return pd.DataFrame()
     return stations
@@ -58,7 +59,7 @@ def save_subscription(user_email: str, station_id: int) -> bool:
         run_change(INSERT_SUB_SQL, values=(
             user_email.strip().lower(), int(station_id)))
         return True
-    except Exception:  # pylint: disable=broad-exception-caught
+    except Exception:  
         return False
 
 
