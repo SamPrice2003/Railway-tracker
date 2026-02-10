@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from xhtml2pdf import pisa
 import boto3
 
+from report_html import generate_report_html
 from upload_to_s3 import get_s3_client, upload_to_s3
 
 logger = getLogger(__name__)
@@ -40,8 +41,8 @@ def convert_html_to_pdf(source_html: str, output_filename: str) -> None:
             dest=f)
 
 
-def create_report(source_html: str) -> str:
-    """Saves a PDF summary report, appending the source HTML into the PDF.
+def create_report() -> str:
+    """Saves a PDF summary report based on database metrics.
     Returns the file name of the PDF summary report saved."""
 
     today = datetime.strftime(TODAY, "%Y/%m/%d")
@@ -51,7 +52,7 @@ def create_report(source_html: str) -> str:
         <img width=100 height=100 align="right" src="{LOGO_SRC}">
         <h1 align="center" style="font-size: 30px">{today} - Summary Report for National Rail</h1>
     </div>
-    ''' + source_html
+    ''' + generate_report_html()
 
     pdf_file = generate_report_filename()
 
@@ -116,9 +117,8 @@ def handler(event=None, context=None):
     Event expects a JSON-formatted string of all destination emails to send the report to."""
 
     load_dotenv()
-
-    # Insert source HTML for report data via another script
-    pdf_file = create_report("")
+    
+    pdf_file = create_report()
 
     send_email(ENV, loads(event)["destination_emails"], pdf_file)
 
