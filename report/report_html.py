@@ -5,7 +5,6 @@
 from os import environ as ENV
 
 from dotenv import load_dotenv
-from psycopg2.extensions import connection
 
 import metrics
 
