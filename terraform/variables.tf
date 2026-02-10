@@ -67,10 +67,18 @@ variable "AWS_SECRET_ACCESS_KEY" {
   sensitive = true
 }
 
+variable "AWS_ECR_REPORT_REPO" {
+  type = string
+}
+
 variable "METRICS_LAMBDA_IMAGE_URI" {
   type = string
 }
 
 variable "REPORTS_LAMBDA_IMAGE_URI" {
+  type = string
+}
+
+variable "SOURCE_EMAIL" {
   type = string
 }
