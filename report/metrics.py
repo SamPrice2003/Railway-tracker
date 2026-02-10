@@ -1,4 +1,4 @@
-"""Script to generate railway metrics for today."""
+"""Script to generate railway metrics for today only."""
 
 # pylint: disable=consider-using-f-string,redefined-outer-name
 
@@ -51,7 +51,7 @@ def get_query_results(conn: connection, query: str) -> int | None:
 
 
 def get_average_delay(conn: connection) -> int:
-    """Returns the average delay over all trains that are on time or delayed in minutes."""
+    """Returns the average delay over all trains that are on time or delayed in minutes for today."""
 
     query = """
             SELECT AVG(EXTRACT(MINUTE FROM (actual_time - scheduled_time))) AS average_delay_mins
@@ -64,7 +64,7 @@ def get_average_delay(conn: connection) -> int:
 
 
 def get_total_cancelled_services(conn: connection) -> int:
-    """Returns the total number of cancelled services."""
+    """Returns the total number of cancelled services for today."""
 
     query = """
             SELECT COUNT(*) AS cancelled_count
@@ -95,7 +95,7 @@ def get_total_services(conn: connection) -> int:
 
 
 def get_total_delayed_services(conn: connection) -> int:
-    """Returns the total number of delays that were delayed by at least 1 minute."""
+    """Returns the total number of delays that were delayed by at least 1 minute today."""
 
     query = """
             SELECT COUNT(DISTINCT service_id)
@@ -107,7 +107,7 @@ def get_total_delayed_services(conn: connection) -> int:
 
 
 def get_total_delayed_arrivals(conn: connection, delay_mins: int, max_delay: int = None) -> int:
-    """Returns the total number of arrivals that were delayed by at least delay_mins minutes."""
+    """Returns the total number of arrivals that were delayed by at least delay_mins minutes today."""
 
     query = """
             SELECT COUNT(*)
@@ -123,7 +123,7 @@ def get_total_delayed_arrivals(conn: connection, delay_mins: int, max_delay: int
 
 
 def get_total_delayed_services_between_times(conn: connection, start_time: str, end_time: str) -> int:
-    """Returns the total number of delayed services between two times of day.
+    """Returns the total number of delayed services between two times of today.
     The parameters must be strings of time e.g. '16:30' and '21:30'."""
 
     query = """
@@ -137,7 +137,7 @@ def get_total_delayed_services_between_times(conn: connection, start_time: str, 
 
 
 def get_most_delayed_service(conn: connection) -> dict:
-    """Returns the details of the most delayed service arrival."""
+    """Returns the details of the most delayed service arrival today."""
 
     query = """
             SELECT
@@ -166,7 +166,7 @@ def get_most_delayed_service(conn: connection) -> dict:
 
 
 def get_most_delayed_lines(conn: connection, limit: int = 5) -> list[dict]:
-    """Returns a list of the most delayed lines and their minutes delayed."""
+    """Returns a list of the most delayed lines and their minutes delayed today."""
 
     query = """
             SELECT
@@ -188,7 +188,7 @@ def get_most_delayed_lines(conn: connection, limit: int = 5) -> list[dict]:
 
 
 def get_most_delayed_stations(conn: connection, limit: int = 5) -> list[dict]:
-    """Returns a list of the most delayed stations with the number of services delayed."""
+    """Returns a list of the most delayed stations with the number of services delayed today."""
 
     query = """
             SELECT
