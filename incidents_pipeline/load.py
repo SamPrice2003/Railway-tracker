@@ -117,13 +117,15 @@ def upload_incident_data(conn: connection, incident_data: dict) -> int:
     return incident_id
 
 
-def upload_data(conn: connection, incident_data: dict) -> None:
+def upload_data(conn: connection, incident_data: dict) -> int:
     """Uploads the incident data to the RDS database and handles uploading
-    of any assignment tables too."""
+    of any assignment tables too. Returns the incident_id of the data."""
 
     incident_data["incident_id"] = upload_incident_data(conn, incident_data)
 
     upload_service_assignment_data(conn, incident_data)
+
+    return incident_data["incident_id"]
 
 
 if __name__ == "__main__":
