@@ -72,7 +72,8 @@ CREATE TABLE IF NOT EXISTS customer (
 
 CREATE TABLE IF NOT EXISTS subscription (
     subscription_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    station_id INT NOT NULL,
+    subscription_type VARCHAR NOT NULL CHECK subscription_type in ('report', 'station')
+    station_id INT,
     customer_id INT NOT NULL,
     FOREIGN KEY (station_id) REFERENCES station(station_id),
     FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
