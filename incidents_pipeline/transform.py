@@ -1,5 +1,7 @@
 """Script which cleans and transforms the data to load into the database."""
 
+# pylint: disable=redefined-outer-name,line-too-long
+
 from os import environ as ENV
 from time import sleep
 from datetime import datetime
