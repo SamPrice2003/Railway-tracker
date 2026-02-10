@@ -21,6 +21,7 @@ AWS_ACCESS_KEY=XXXX
 AWS_SECRET_KEY=XXXX
 AWS_REGION=XXXX
 AWS_ECR_REPO=XXXX
+INCIDENT_TOPIC=XXXX
 ```
 
 The STOMP information can be found via registering for the [National Rail Data Portal](https://opendata.nationalrail.co.uk/feeds). It is located under the title "Knowledgebase (KB) Real Time Incidents".
@@ -80,3 +81,13 @@ python load.py
 ```
 
 This script stops after a single upload is made.
+
+### Alert
+
+Running this script will wait for a new incident, add it to the `incident` table, then publish the incident to our `INCIDENT_TOPIC` via SNS:
+
+```sh
+python alert.py
+```
+
+This script runs continuously.
