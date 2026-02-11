@@ -20,7 +20,7 @@ from metrics import get_db_connection
 logger = getLogger(__name__)
 basicConfig(level=INFO)
 
-LOGO_SRC = "../logo/default.png"
+LOGO_SRC = "../logo/default_no_slogan.png"
 TODAY = datetime.today()
 
 
