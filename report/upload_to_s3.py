@@ -11,8 +11,8 @@ def get_s3_client(config: _Environ) -> client:
 
     return client(
         "s3",
-        aws_access_key_id=config["AWS_ACCESS_KEY"],
-        aws_secret_access_key=config["AWS_SECRET_KEY"]
+        aws_access_key_id=config["ACCESS_KEY_AWS"],
+        aws_secret_access_key=config["SECRET_KEY_AWS"]
     )
 
 
