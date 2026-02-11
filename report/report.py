@@ -25,9 +25,13 @@ TODAY = datetime.today()
 
 
 def generate_report_filename() -> str:
-    """Returns a filename for the report depending on the current date."""
+    """Returns a filename for the report depending on the current date.
+    If in a Lambda, the filename is inside `tmp/`."""
 
     today = datetime.strftime(TODAY, "%Y-%m-%d")
+
+    if ENV.get("AWS_LAMBDA_FUNCTION_NAME"):
+        return f"/tmp/{today}-summary-report-national-rail.pdf"
 
     return f"{today}-summary-report-national-rail.pdf"
 
