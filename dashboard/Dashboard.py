@@ -1,5 +1,4 @@
 """Main Streamlit app for the Railway Tracker dashboard."""
-
 import base64
 from datetime import date, timedelta
 from pathlib import Path
@@ -25,7 +24,7 @@ from visualisations import (
     show_operator_delay_bars,
 )
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parents[2]
 SIDEBAR_LOGO_PATH = BASE_DIR / "logo" / \
     "vector" / "isolated-monochrome-white.svg"
 MAIN_LOGO_PATH = BASE_DIR / "logo" / "vector" / "default-monochrome.svg"

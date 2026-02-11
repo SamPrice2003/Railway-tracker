@@ -61,7 +61,6 @@ def save_subscription(user_email: str, station_id: int) -> bool:
 def render_subscribe_page() -> None:
     """Render the subscribe page."""
     add_subscribe_css()
-
     st.title("Subscribe")
     st.markdown(
         "<p class='ss-blue'>Get alerts for delays and incidents on your chosen station.</p>",

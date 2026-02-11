@@ -1,5 +1,4 @@
 """Incidents page with simple charts and basic impact numbers."""
-
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
