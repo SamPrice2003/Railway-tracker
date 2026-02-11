@@ -5,9 +5,9 @@ import pandas as pd
 from database_connection import fetch_dataframe
 
 
-def load_arrivals(lookback_days: int = 7) -> pd.DataFrame:
+def load_arrivals(previous_days: int = 7) -> pd.DataFrame:
     """Load arrivals from the database for the last N days."""
-    days = int(lookback_days)
+    days = int(previous_days)
 
     sql = """
         SELECT
@@ -41,10 +41,10 @@ def get_kpi_numbers(arrivals_df: pd.DataFrame, delay_limit_mins: int = 5) -> dic
 
     data = arrivals_df.copy()
 
-    cancelled_mask = _get_cancelled_mask(data)
+    cancelled_mask = get_cancelled_mask(data)
     cancellation_rate = float(cancelled_mask.mean())
 
-    delays = _get_delay_minutes(data, cancelled_mask)
+    delays = get_delay_minutes(data, cancelled_mask)
     if delays.empty:
         return {
             "cancellation_rate": cancellation_rate,
@@ -69,7 +69,7 @@ def get_kpi_numbers(arrivals_df: pd.DataFrame, delay_limit_mins: int = 5) -> dic
     }
 
 
-def _get_cancelled_mask(data: pd.DataFrame) -> pd.Series:
+def get_cancelled_mask(data: pd.DataFrame) -> pd.Series:
     """Return a boolean mask for cancelled rows based on location_cancelled."""
     if "location_cancelled" not in data.columns:
         return pd.Series(False, index=data.index)
@@ -77,7 +77,7 @@ def _get_cancelled_mask(data: pd.DataFrame) -> pd.Series:
     return data["location_cancelled"].fillna(False).astype(bool)
 
 
-def _get_delay_minutes(data: pd.DataFrame, cancelled_mask: pd.Series) -> pd.Series:
+def get_delay_minutes(data: pd.DataFrame, cancelled_mask: pd.Series) -> pd.Series:
     """Return delay minutes for non cancelled rows and treat early trains as zero."""
     needed_cols = {"arrival_date", "scheduled_time", "actual_time"}
     if not needed_cols.issubset(set(data.columns)):

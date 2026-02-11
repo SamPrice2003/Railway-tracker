@@ -25,9 +25,6 @@ from visualisations import (
     show_operator_delay_bars,
 )
 
-CACHE_TTL_SECONDS = 300
-KPI_DELAY_LIMIT_MINS = 5
-
 BASE_DIR = Path(__file__).resolve().parent
 SIDEBAR_LOGO_PATH = BASE_DIR / "logo" / \
     "vector" / "isolated-monochrome-white.svg"
@@ -180,19 +177,19 @@ def show_main_logo() -> None:
     )
 
 
-@st.cache_data(ttl=CACHE_TTL_SECONDS)
+@st.cache_data(ttl=300)
 def get_stations() -> object:
     """Load station data and cache it for a short time."""
     return load_stations()
 
 
-@st.cache_data(ttl=CACHE_TTL_SECONDS)
+@st.cache_data(ttl=300)
 def get_arrivals_for_charts(days_back: int) -> object:
     """Load arrival rows for KPI and chart use and cache it for a short time."""
-    return load_arrivals(lookback_days=int(days_back))
+    return load_arrivals(previous_days=int(days_back))
 
 
-@st.cache_data(ttl=CACHE_TTL_SECONDS)
+@st.cache_data(ttl=300)
 def get_arrivals_for_map(chosen_day: date) -> object:
     """Load arrival rows for a chosen day on the map and cache it for a short time."""
     return load_arrivals_for_day(chosen_day)
@@ -209,12 +206,12 @@ def show_dashboard() -> None:
     with st.spinner("Loading KPI data..."):
         raw_kpi_rows = get_arrivals_for_charts(7)
         kpis = get_kpi_numbers(
-            raw_kpi_rows, delay_limit_mins=KPI_DELAY_LIMIT_MINS)
+            raw_kpi_rows, delay_limit_mins=5)
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Cancellation Rate", f"{kpis['cancellation_rate'] * 100:.1f}%")
     col2.metric(
-        f"Delay Rate (≥ {KPI_DELAY_LIMIT_MINS} mins)",
+        f"Delay Rate (≥ {5} mins)",
         f"{kpis['delay_rate'] * 100:.1f}%",
     )
     col3.metric("Average Delay (All Trains)",
@@ -241,7 +238,7 @@ def show_dashboard() -> None:
         st.markdown(
             (
                 "<div class='ss-caption'>Percentage of trains with severe delays "
-                f"(≥ {KPI_DELAY_LIMIT_MINS} mins)</div>"
+                f"(≥ {5} mins)</div>"
             ),
             unsafe_allow_html=True,
         )
@@ -270,7 +267,7 @@ def show_dashboard() -> None:
 
     show_avg_delay_line(
         raw_trend_rows,
-        lookback_days=trend_days,
+        previous_days=trend_days,
         group_by="H",
         smooth_window=6,
         key="avg_delay_sparkline_main",
@@ -297,7 +294,7 @@ def show_dashboard() -> None:
 
     show_delay_histogram(
         raw_dist_rows,
-        lookback_days=dist_days,
+        previous_days=dist_days,
         bin_count=30,
         max_delay_mins=60,
         key="delay_histogram_main",
@@ -324,7 +321,7 @@ def show_dashboard() -> None:
 
     show_operator_delay_bars(
         raw_operator_rows,
-        lookback_days=operator_days,
+        previous_days=operator_days,
         metric="Mean",
         top_n=10,
         max_delay_mins=60,

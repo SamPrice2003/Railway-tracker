@@ -7,38 +7,6 @@ import streamlit as st
 from database_connection import fetch_dataframe
 
 
-INCIDENTS_SQL = """
-    SELECT
-        incident_id,
-        summary,
-        incident_start,
-        incident_end,
-        url,
-        planned
-    FROM incident
-    ORDER BY incident_start DESC;
-"""
-
-USERS_AFFECTED_SQL = """
-    SELECT
-        COUNT(DISTINCT sub.customer_id) AS users_affected,
-        COUNT(DISTINCT sub.station_id) AS stations_with_subscribers
-    FROM incident AS i
-    JOIN service_assignment AS sa
-        ON sa.incident_id = i.incident_id
-    JOIN arrival AS a
-        ON a.service_id = sa.service_id
-    JOIN subscription AS sub
-        ON sub.station_id = a.arrival_station_id
-    WHERE i.incident_start <= NOW()
-      AND (i.incident_end IS NULL OR i.incident_end >= NOW())
-      AND (
-            (a.arrival_date + a.actual_time) >= NOW() - INTERVAL '24 hours'
-         OR (a.arrival_date + a.scheduled_time) >= NOW() - INTERVAL '24 hours'
-      );
-"""
-
-
 def add_incidents_css() -> None:
     """Add small CSS tweaks used on the incidents page."""
     st.markdown(
@@ -69,10 +37,19 @@ def to_bool(values: pd.Series) -> pd.Series:
     return cleaned.isin(["true", "t", "1", "yes"]).astype("boolean")
 
 
-
 def load_incident_rows() -> pd.DataFrame:
     """Load incidents and add a few extra columns used by the page."""
-    data = fetch_dataframe(INCIDENTS_SQL)
+    data = fetch_dataframe("""
+    SELECT
+        incident_id,
+        summary,
+        incident_start,
+        incident_end,
+        url,
+        planned
+    FROM incident
+    ORDER BY incident_start DESC;
+    """)
     if data is None or data.empty:
         return pd.DataFrame()
 
@@ -96,7 +73,24 @@ def load_incident_rows() -> pd.DataFrame:
 
 def load_users_affected() -> tuple[int, int]:
     """Load estimated impacted users and subscribed stations for active incidents."""
-    data = fetch_dataframe(USERS_AFFECTED_SQL)
+    data = fetch_dataframe("""
+    SELECT
+        COUNT(DISTINCT sub.customer_id) AS users_affected,
+        COUNT(DISTINCT sub.station_id) AS stations_with_subscribers
+    FROM incident AS i
+    JOIN service_assignment AS sa
+        ON sa.incident_id = i.incident_id
+    JOIN arrival AS a
+        ON a.service_id = sa.service_id
+    JOIN subscription AS sub
+        ON sub.station_id = a.arrival_station_id
+    WHERE i.incident_start <= NOW()
+      AND (i.incident_end IS NULL OR i.incident_end >= NOW())
+      AND (
+            (a.arrival_date + a.actual_time) >= NOW() - INTERVAL '24 hours'
+         OR (a.arrival_date + a.scheduled_time) >= NOW() - INTERVAL '24 hours'
+      );
+    """)
     if data is None or data.empty:
         return 0, 0
 

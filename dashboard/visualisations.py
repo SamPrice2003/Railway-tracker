@@ -5,14 +5,14 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
-def keep_between_zero_and_one(rate: float | None) -> float:
+def keep_between_zero_and_one(rate: float ) -> float:
     """Keep a rate value between 0 and 1."""
     if rate is None:
         return 0.0
     return max(0.0, min(1.0, float(rate)))
 
 
-def _make_delay_table(arrivals: pd.DataFrame) -> pd.DataFrame:
+def make_delay_table(arrivals: pd.DataFrame) -> pd.DataFrame:
     """Turn raw arrival rows into a table with delay minutes and timestamps."""
     if arrivals is None or arrivals.empty:
         return pd.DataFrame()
@@ -55,14 +55,14 @@ def _make_delay_table(arrivals: pd.DataFrame) -> pd.DataFrame:
     return table
 
 
-def get_recent_arrivals(arrivals: pd.DataFrame, lookback_days: int) -> pd.DataFrame:
+def get_recent_arrivals(arrivals: pd.DataFrame, previous_days: int) -> pd.DataFrame:
     """Return only the last N days of arrivals with delay minutes calculated."""
-    table = _make_delay_table(arrivals)
+    table = make_delay_table(arrivals)
     if table.empty:
         return pd.DataFrame()
 
     latest_time = table["actual_dt"].max()
-    start_time = latest_time - pd.Timedelta(days=int(lookback_days))
+    start_time = latest_time - pd.Timedelta(days=int(previous_days))
     return table[table["actual_dt"] >= start_time].copy()
 
 
@@ -104,15 +104,12 @@ def show_delay_gauge(delay_rate: float, key: str = "delay_gauge") -> None:
     chart.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=20))
     st.plotly_chart(chart, use_container_width=True, key=key)
 
-def show_avg_delay_line(
-    arrivals: pd.DataFrame,
-    lookback_days: int = 7,
-    group_by: str = "H",
+
+def show_avg_delay_line(arrivals: pd.DataFrame, previous_days: int = 7, group_by: str = "H",
     smooth_window: int = 6,
-    key: str = "avg_delay_sparkline",
-) -> None:
+    key: str = "avg_delay_sparkline",) -> None:
     """Show a smoothed line of average delay over time."""
-    table = get_recent_arrivals(arrivals, lookback_days)
+    table = get_recent_arrivals(arrivals, previous_days)
     if table.empty:
         st.info("Not enough non cancelled records to plot average delay over time.")
         return
@@ -169,13 +166,13 @@ def show_avg_delay_line(
 
 def show_delay_histogram(
     arrivals: pd.DataFrame,
-    lookback_days: int = 7,
+    previous_days: int = 7,
     bin_count: int = 30,
     max_delay_mins: int = 60,
     key: str = "delay_histogram",
 ) -> None:
     """Show a histogram of delay minutes for the selected time window."""
-    table = get_recent_arrivals(arrivals, lookback_days)
+    table = get_recent_arrivals(arrivals, previous_days)
     if table.empty:
         st.info("Not enough non cancelled records to plot delay distribution.")
         return
@@ -204,7 +201,7 @@ def show_delay_histogram(
 
 def show_operator_delay_bars(
     arrivals: pd.DataFrame,
-    lookback_days: int = 7,
+    previous_days: int = 7,
     metric: str = "Mean",
     top_n: int = 10,
     max_delay_mins: int = 60,
@@ -212,7 +209,7 @@ def show_operator_delay_bars(
     key: str = "avg_delay_by_operator",
 ) -> None:
     """Show a bar chart of average or median delay by operator."""
-    table = get_recent_arrivals(arrivals, lookback_days)
+    table = get_recent_arrivals(arrivals, previous_days)
     if table.empty:
         st.info("Not enough non cancelled records to compare operators.")
         return
@@ -231,7 +228,7 @@ def show_operator_delay_bars(
     if table.empty:
         message = (
             f"No operators have at least {min_services} services "
-            f"in the last {lookback_days} days."
+            f"in the last {previous_days} days."
         )
         st.info(message)
         return

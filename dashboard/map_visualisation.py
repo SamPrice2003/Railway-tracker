@@ -9,8 +9,9 @@ from database_connection import fetch_dataframe
 
 UK_center_coordinates = (54.5, -2.5)
 
-
-STATIONS_SQL = """
+def load_stations() -> pd.DataFrame:
+    """Load station details from the database."""
+    return fetch_dataframe("""
     SELECT
         station_id,
         station_name,
@@ -18,9 +19,11 @@ STATIONS_SQL = """
         latitude,
         longitude
     FROM station;
-"""
+    """)
 
-ARRIVALS_FOR_DAY_SQL = """
+def load_arrivals_for_day(chosen_day: date) -> pd.DataFrame:
+    """Load arrivals for a single day and calculate delay minutes."""
+    rows = fetch_dataframe("""
     SELECT
         a.arrival_station_id AS arrival_station_id,
         (a.arrival_date + a.scheduled_time) AS scheduled_arr_time,
@@ -33,17 +36,7 @@ ARRIVALS_FOR_DAY_SQL = """
         ) AS delay_minutes
     FROM arrival AS a
     WHERE a.arrival_date = %s;
-"""
-
-
-def load_stations() -> pd.DataFrame:
-    """Load station details from the database."""
-    return fetch_dataframe(STATIONS_SQL)
-
-
-def load_arrivals_for_day(chosen_day: date) -> pd.DataFrame:
-    """Load arrivals for a single day and calculate delay minutes."""
-    rows = fetch_dataframe(ARRIVALS_FOR_DAY_SQL, values=(chosen_day,))
+    """, values=(chosen_day,))
     if rows is None or rows.empty:
         return pd.DataFrame()
 
@@ -170,21 +163,3 @@ def build_map(stations: pd.DataFrame, lateness: pd.DataFrame) -> folium.Map:
     add_map_legend(map_obj)
     return map_obj
 
-
-# def main() -> None:
-#     """Build a test HTML map for today and save it locally."""
-#     stations = load_stations()
-#     arrivals = load_arrivals_for_day(date.today())
-#     if arrivals.empty:
-#         print("No arrivals found for today.")
-#         return
-
-#     arrivals = arrivals.copy()
-#     arrivals["is_late"] = arrivals["delay_minutes"] >= 2
-
-#     lateness = build_station_lateness(stations, arrivals)
-#     map_obj = build_map(stations, lateness)
-#     map_obj.save("/temp/station_lateness_map.html")
-
-if __name__ == "__main__":
-  ...

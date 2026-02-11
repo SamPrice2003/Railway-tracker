@@ -4,30 +4,15 @@ import streamlit as st
 
 from database_connection import fetch_dataframe, run_change
 
+from subscribe_page import is_valid_email
 
-def looks_like_email(email: str) -> bool:
-    """Return True if the text looks like a valid email."""
+
+def is_valid_email(email: str) -> bool:
+    """Check if an email looks valid using a simple pattern."""
     if not email:
         return False
-
-    cleaned = email.strip().lower()
-    if " " in cleaned:
-        return False
-
-    if cleaned.count("@") != 1:
-        return False
-
-    local_part, domain_part = cleaned.split("@")
-    if not local_part or not domain_part:
-        return False
-
-    if "." not in domain_part:
-        return False
-
-    if domain_part.startswith(".") or domain_part.endswith("."):
-        return False
-
-    return True
+    pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+    return re.match(pattern, email.strip()) is not None
 
 
 def find_customer_id(email: str) -> int | None:
@@ -71,7 +56,7 @@ def render_unsubscribe_page() -> None:
         return
 
     cleaned_email = (email or "").strip().lower()
-    if not looks_like_email(cleaned_email):
+    if not is_valid_email(cleaned_email):
         st.error("Please enter a valid email address.")
         st.markdown("<a href='?'>Back</a>", unsafe_allow_html=True)
         return

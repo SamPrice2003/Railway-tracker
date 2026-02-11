@@ -54,3 +54,22 @@ def run_change_returning(sql_query: str, values: tuple) -> pd.DataFrame:
         connection.close()
 
 
+def load_stations_with_coords() -> pd.DataFrame:
+    """Load stations that have valid latitude and longitude values."""
+    stations = fetch_dataframe("""
+    SELECT
+        station_id,
+        station_name,
+        station_crs,
+        latitude,
+        longitude
+    FROM station
+    WHERE latitude IS NOT NULL
+      AND longitude IS NOT NULL;
+    """)
+    if stations is None:
+        return pd.DataFrame()
+    return stations
+
+
+
