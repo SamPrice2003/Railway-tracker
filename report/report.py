@@ -99,8 +99,8 @@ def send_email(config: _Environ, destination_emails: list[str], pdf_file_name: s
 
     client = boto3.client("ses",
                           region_name=config["AWS_REGION"],
-                          aws_access_key_id=config["AWS_ACCESS_KEY"],
-                          aws_secret_access_key=config["AWS_SECRET_KEY"])
+                          aws_access_key_id=config["ACCESS_KEY_AWS"],
+                          aws_secret_access_key=config["SECRET_KEY_AWS"])
     message = MIMEMultipart()
 
     today = datetime.strftime(TODAY, "%d/%m/%Y")
