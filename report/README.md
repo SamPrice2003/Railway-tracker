@@ -1,8 +1,8 @@
-# Metrics Pipeline
+# PDF Summary Report
 
 ## Overview
 
-This is an ETL pipeline which extracts all services and arrivals at stations using the Real Time Trains API, transforms and cleans the data, and loads it all into the RDS database.
+This is a set of scripts which generates a report showcasing today's National Rail metrics in a PDF format. It also emails subscribers this report and uploads the report to the S3 bucket.
 
 
 ## Installation & Setup
@@ -25,72 +25,44 @@ DB_PORT=5432
 DB_NAME=<your_database_name>
 DB_USER=<your_database_username>
 DB_PASSWORD=<your_database_password>
-
-RTT_USER=<your_RRT_API_username>
-RTT_PASSWORD=<your_RRT_API_password>
-
-AWS_ACCOUNT_ID=<your_aws_account_id>
 AWS_REGION=<your_aws_region>
-AWS_ECR_REPO=<your_aws_ecr_repo_name>
+ACCESS_KEY_AWS=<your_AWS_access_key>
+SECRET_KEY_AWS=<your_AWS_secret_key>
+S3_BUCKET_NAME=<your_S3_bucket_name>
+AWS_ECR_REPO=<your_aws_ECR_repo_name>
+SOURCE_EMAIL=<your_source_email_for_reports>
 ```
 
 
 ## Quick Start
 
-To run the pipeline for today's today at the current time, run the following commands:
-1. `cd metrics_pipeline`
-2. `pip3 install -r requirements.txt`
-3. `python3 load.py`
+### Local Pipeline
+
+If you would like to send a PDF summary report email to subscribed users (in the database `subscription` table) and upload the PDF to your S3 bucket, run the following:
+
+```sh
+python report.py
+```
+
+### AWS ECR Imaging
+
+If you would like to push an image of the pipeline to your ECR repository, simply run the following:
+
+```sh
+sh dockerise.sh
+```
+
+Bear in mind you must have `AWS_REGION` and `AWS_ECR_REPO` in your [environment variables](#environment-variables).
+
 
 ## Development
 
-This section is for specific use of each script in the pipeline. 
+This section is for specific use of other scripts in the pipeline.
 
-### Extract
+### Report HTML
 
-Running this script will return a dictionary with 2 keys - 'services' and 'arrivals'. These sub dictionaries contain all the data for services and arrivals to be uploaded later.
-
-Run:
+Running this script will write a new HTML file to the current directory with the PDF report contents:
 
 ```sh
-python3 extract.py
+python report_html.py
 ```
-
-### Transform
-
-Running this script will transform the data from dictionaries into dataframes for usage in the loading script.
-
-Run:
-
-```sh
-python3 transform.py
-```
-
-### Load
-
-Running this script will load all of the transformed data into the database provided with the .env credentials.
-
-Run:
-
-
-```sh
-python3 load.py
-```
-
-## Pipeline
-
-Running this script will execute the pipeline in a similar way to `load.py`. This script is formatted for a Lambda function for later use on AWS.
-
-Run:
-
-```sh
-python3 pipeline.py
-```
-
-## Additional Information
-This script is designed to be pushed to the cloud as a docker image. To do so, you need the following:
-- Valid AWS credentials.
-- An ECR repository and it's name.
-- Docker desktop running in the background.
-
-Once these requirements are met, with the proper environment variables set, run `bash dockerise.sh` to push the contents of the pipeline to the ECR repository. Eventually the image pushed here is to be targeted by a Lambda function, which executes every hour.
