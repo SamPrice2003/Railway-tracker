@@ -199,3 +199,9 @@ Avoid committing DB credentials. Use Secrets Manager.
 To delete all resources created by this Terraform:
 
     - terraform destroy
+
+
+
+# TODO LIST REMOVE LATER:
+ - Make sure ECR's work and Images can be pushed to them.
+ - 
