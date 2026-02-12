@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 source .env
 
 TERRAFORM_DIR="./terraform"
