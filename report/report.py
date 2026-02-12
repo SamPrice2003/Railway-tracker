@@ -25,9 +25,13 @@ TODAY = datetime.today()
 
 
 def generate_report_filename() -> str:
-    """Returns a filename for the report depending on the current date."""
+    """Returns a filename for the report depending on the current date.
+    If in a Lambda, the filename is inside `tmp/`."""
 
     today = datetime.strftime(TODAY, "%Y-%m-%d")
+
+    if ENV.get("AWS_LAMBDA_FUNCTION_NAME"):
+        return f"/tmp/{today}-summary-report-national-rail.pdf"
 
     return f"{today}-summary-report-national-rail.pdf"
 
@@ -95,8 +99,8 @@ def send_email(config: _Environ, destination_emails: list[str], pdf_file_name: s
 
     client = boto3.client("ses",
                           region_name=config["AWS_REGION"],
-                          aws_access_key_id=config["AWS_ACCESS_KEY"],
-                          aws_secret_access_key=config["AWS_SECRET_KEY"])
+                          aws_access_key_id=config["ACCESS_KEY_AWS"],
+                          aws_secret_access_key=config["SECRET_KEY_AWS"])
     message = MIMEMultipart()
 
     today = datetime.strftime(TODAY, "%d/%m/%Y")
