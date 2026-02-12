@@ -2,7 +2,7 @@
 
 ## Overview
 
-<!--insert overview here-->
+This is an ETL pipeline which extracts all services and arrivals at stations using the Real Time Trains API, transforms and cleans the data, and loads it all into the RDS database.
 
 
 ## Installation & Setup
