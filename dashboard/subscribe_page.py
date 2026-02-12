@@ -99,31 +99,56 @@ def render_subscribe_page() -> None:
         return
 
     stations = stations.copy()
-    stations["label"] = stations["station_name"] + \
-        " (" + stations["station_crs"] + ")"
+    stations["label"] = (
+        stations["station_name"] + " (" + stations["station_crs"] + ")"
+    )
 
     with st.form("subscribe_form", clear_on_submit=False):
         email = st.text_input("Your email")
+
         chosen_label = st.selectbox(
-            "Choose a station", stations["label"].tolist())
+            "Choose a station",
+            stations["label"].tolist(),
+        )
+
+        subscribe_daily = st.checkbox(
+            "Subscribe to daily summary report"
+        )
+
         submitted = st.form_submit_button("Subscribe")
 
     if submitted:
         if not is_valid_email(email):
             st.error("Please enter a valid email address.")
+            return
+
+        chosen_row = stations[stations["label"] == chosen_label].head(1)
+        if chosen_row.empty:
+            st.error("Could not find that station, please try again.")
+            return
+
+        station_id = int(chosen_row.iloc[0]["station_id"])
+
+        station_ok = save_subscription(
+            email,
+            station_id,
+            subscription_type="station",
+        )
+
+        report_ok = True
+        if subscribe_daily:
+            report_ok = save_subscription(
+                email,
+                station_id,
+                subscription_type="report",
+            )
+
+        if station_ok and report_ok:
+            st.success("Subscription saved successfully.")
         else:
-            chosen_row = stations[stations["label"] == chosen_label].head(1)
-            if chosen_row.empty:
-                st.error("Could not find that station, please try again.")
-            else:
-                station_id = int(chosen_row.iloc[0]["station_id"])
-                ok = save_subscription(email, station_id)
+            st.error("Subscription failed, you may already be subscribed.")
 
-                if ok:
-                    st.success("Subscribed successfully.")
-                else:
-                    st.error(
-                        "Subscription failed, you may already be subscribed.")
-
-    st.markdown("<a href='?view=unsubscribe'>Unsubscribe</a>",
-                unsafe_allow_html=True)
+    st.markdown(
+        "<a href='?view=unsubscribe'>Unsubscribe</a>",
+        unsafe_allow_html=True,
+    )
