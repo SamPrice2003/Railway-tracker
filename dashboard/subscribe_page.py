@@ -3,7 +3,7 @@
 from os import environ as ENV
 
 from re import match
-from json import dumps
+from json import dumps, loads
 from dotenv import load_dotenv
 
 from boto3 import client
@@ -18,8 +18,8 @@ def get_sns_client() -> client:
 
     return client(
         "sns",
-        aws_access_key_id=ENV["AWS_ACCESS_KEY"],
-        aws_secret_access_key=ENV["AWS_SECRET_KEY"]
+        aws_access_key_id=ENV["ACCESS_KEY_AWS"],
+        aws_secret_access_key=ENV["SECRET_KEY_AWS"]
     )
 
 
@@ -96,25 +96,42 @@ def get_or_create_customer_id(user_email: str) -> int:
     return int(df.iloc[0]["customer_id"])
 
 
-def subscribe_customer(user_email: str, station_name: str) -> None:
-    """Subscribes a customer to the SNS topic for their station."""
+def subscribe_customer(user_email: str, station_name: str) -> str:
+    """Subscribes a customer to the SNS topic for their station.
+    Returns the subscription ARN."""
 
     sns_client = get_sns_client()
 
-    sns_topic_arn = get_sns_topic_arn(sns_client, ENV["SNS_TOPIC"])
+    subscription_arns = [subscription["SubscriptionArn"] for subscription in sns_client.list_subscriptions_by_topic(
+        TopicArn=get_sns_topic_arn())["Subscriptions"] if subscription["Endpoint"] == user_email]
 
-    sns_client.subscribe(
-        TopicArn=sns_topic_arn,
-        Protocol="email",
-        Endpoint=user_email,
-        Attributes={
-            "FilterPolicy": dumps({
-                "stations": [
-                    station_name
-                ]
-            })
-        }
+    if len(subscription_arns) == 0:
+        return sns_client.subscribe(
+            TopicArn=get_sns_topic_arn(),
+            Protocol="email",
+            Endpoint=user_email,
+            Attributes={
+                "FilterPolicy": dumps({
+                    "stations": [
+                        station_name
+                    ]
+                })
+            },
+            ReturnSubscriptionArn=True
+        )
+
+    current_filter_policy = loads(sns_client.get_subscription_attributes(
+        SubscriptionArn=subscription_arns[0])["Attributes"]["FilterPolicy"])
+
+    current_filter_policy["stations"].append(station_name)
+
+    sns_client.set_subscription_attributes(
+        SubscriptionArn=subscription_arns[0],
+        AttributeName="FilterPolicy",
+        AttributeValue=dumps(current_filter_policy)
     )
+
+    return subscription_arns[0]
 
 
 def save_subscription(user_email: str, station_id: int, subscription_type: str = "station", station_name: str = None) -> bool:
@@ -212,3 +229,6 @@ def render_subscribe_page() -> None:
 
 if __name__ == "__main__":
     load_dotenv()
+
+    print(subscribe_customer(
+        "trainee.sufyan.shah@sigmalabs.co.uk", "Sidcup"))
