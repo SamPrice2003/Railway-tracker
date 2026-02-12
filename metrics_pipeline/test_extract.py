@@ -7,7 +7,7 @@ from unittest.mock import patch, mock_open
 
 from requests import Session, Response
 
-from extract import get_crs, get_station_data
+from metrics_pipeline.extract import get_crs, get_station_data
 
 orig_open = open
 
