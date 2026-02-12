@@ -1,0 +1,7 @@
+psycopg2-binary
+pandas
+folium
+streamlit
+streamlit-folium
+python-dotenv
+plotly
