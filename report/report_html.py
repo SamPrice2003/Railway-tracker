@@ -26,7 +26,7 @@ def generate_report_html() -> str:
 <h2 style="font-size:21px;">1. Overall Metrics</h2>
 
 <table width="100%" cellspacing="0" cellpadding="6" border="1">
-    <tr style="background-color:lightgrey">
+    <tr style="background-color:lightblue">
         <th align="left">Service Metrics</th>
         <th align="right">Amount</th>
     </tr>
@@ -49,7 +49,7 @@ def generate_report_html() -> str:
 <p>The average delay across all trains was {metrics.get_average_delay(conn):.2f} minutes.
 
 <table width="100%" cellspacing="0" cellpadding="6" border="1">
-    <tr style="background-color:lightgrey">
+    <tr style="background-color:lightblue">
         <th align="left">Delay Band</th>
         <th align="right">Frequency</th>
         <th align="right">% of Delayed</th>
@@ -80,7 +80,7 @@ def generate_report_html() -> str:
 arriving at {most_delayed_service["arrival_station_name"]} with a delay of {most_delayed_service["delay_mins"]} minutes.</p>
 
 <table width="100%" cellspacing="0" cellpadding="6" border="1">
-    <tr style="background-color:lightgrey">
+    <tr style="background-color:lightblue">
         <th align="left">Time Period</th>
         <th align="right">Delay %</th>
     </tr>
