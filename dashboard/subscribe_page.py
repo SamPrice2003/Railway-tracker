@@ -229,6 +229,3 @@ def render_subscribe_page() -> None:
 
 if __name__ == "__main__":
     load_dotenv()
-
-    print(subscribe_customer(
-        "trainee.sufyan.shah@sigmalabs.co.uk", "Sidcup"))
