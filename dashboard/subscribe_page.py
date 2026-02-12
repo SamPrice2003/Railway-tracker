@@ -1,11 +1,39 @@
 """Subscribe page where a user can sign up for station alerts."""
 # pylint: disable=broad-exception-caught
-from re import match
+from os import environ as ENV
 
+from re import match
+from json import dumps
+from dotenv import load_dotenv
+
+from boto3 import client
 import pandas as pd
 import streamlit as st
 
 from database_connection import fetch_dataframe, run_change, run_change_returning
+
+
+def get_sns_client() -> client:
+    """Returns an AWS SNS client."""
+
+    return client(
+        "sns",
+        aws_access_key_id=ENV["AWS_ACCESS_KEY"],
+        aws_secret_access_key=ENV["AWS_SECRET_KEY"]
+    )
+
+
+def get_sns_topic_arn() -> str:
+    """Returns the SNS topic ARN. Returns the ARN if it already exists.
+    Creates a new SNS topic and returns the ARN if it does not already exist."""
+
+    sns_client = get_sns_client()
+
+    response = sns_client.create_topic(
+        Name=ENV["SNS_TOPIC"]
+    )
+
+    return response["TopicArn"]
 
 
 def add_subscribe_css() -> None:
@@ -68,7 +96,28 @@ def get_or_create_customer_id(user_email: str) -> int:
     return int(df.iloc[0]["customer_id"])
 
 
-def save_subscription(user_email: str, station_id: int, subscription_type: str = "station") -> bool:
+def subscribe_customer(user_email: str, station_name: str) -> None:
+    """Subscribes a customer to the SNS topic for their station."""
+
+    sns_client = get_sns_client()
+
+    sns_topic_arn = get_sns_topic_arn(sns_client, ENV["SNS_TOPIC"])
+
+    sns_client.subscribe(
+        TopicArn=sns_topic_arn,
+        Protocol="email",
+        Endpoint=user_email,
+        Attributes={
+            "FilterPolicy": dumps({
+                "stations": [
+                    station_name
+                ]
+            })
+        }
+    )
+
+
+def save_subscription(user_email: str, station_id: int, subscription_type: str = "station", station_name: str = None) -> bool:
     try:
         customer_id = get_or_create_customer_id(user_email)
         run_change(
@@ -78,6 +127,10 @@ def save_subscription(user_email: str, station_id: int, subscription_type: str =
             """,
             values=(customer_id, int(station_id), subscription_type),
         )
+
+        if subscription_type == "station" and station_name:
+            subscribe_customer(user_email, station_name)
+
         return True
     except Exception:
         return False
@@ -129,11 +182,13 @@ def render_subscribe_page() -> None:
             return
 
         station_id = int(chosen_row.iloc[0]["station_id"])
+        station_name = chosen_row.iloc[0]["station_name"]
 
         station_ok = save_subscription(
             email,
             station_id,
             subscription_type="station",
+            station_name=station_name
         )
 
         report_ok = True
@@ -153,3 +208,7 @@ def render_subscribe_page() -> None:
         "<a href='?view=unsubscribe'>Unsubscribe</a>",
         unsafe_allow_html=True,
     )
+
+
+if __name__ == "__main__":
+    load_dotenv()
