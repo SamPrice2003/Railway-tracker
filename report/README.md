@@ -57,7 +57,7 @@ Bear in mind you must have `AWS_REGION` and `AWS_ECR_REPO` in your [environment 
 
 ## Development
 
-This section is for specific use of other scripts in the pipeline.
+This section is for specific use of other scripts in the report folder.
 
 ### Report HTML
 
