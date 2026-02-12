@@ -67,6 +67,7 @@ def get_or_create_customer_id(user_email: str) -> int:
         raise ValueError("Failed to create customer.")
     return int(df.iloc[0]["customer_id"])
 
+
 def save_subscription(user_email: str, station_id: int, subscription_type: str = "station") -> bool:
     try:
         customer_id = get_or_create_customer_id(user_email)

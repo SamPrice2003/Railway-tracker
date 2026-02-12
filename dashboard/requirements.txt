@@ -5,3 +5,4 @@ streamlit
 streamlit-folium
 python-dotenv
 plotly
+boto3
