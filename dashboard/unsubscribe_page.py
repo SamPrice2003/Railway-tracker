@@ -3,16 +3,7 @@
 import streamlit as st
 
 from database_connection import fetch_dataframe, run_change
-
 from subscribe_page import is_valid_email
-
-
-def is_valid_email(email: str) -> bool:
-    """Check if an email looks valid using a simple pattern."""
-    if not email:
-        return False
-    pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-    return re.match(pattern, email.strip()) is not None
 
 
 def find_customer_id(email: str) -> int | None:
@@ -22,7 +13,7 @@ def find_customer_id(email: str) -> int | None:
     FROM customer
     WHERE customer_email = %s
     LIMIT 1;
-""", values=(email,))
+    """, values=(email,))
     if result is None or result.empty:
         return None
 

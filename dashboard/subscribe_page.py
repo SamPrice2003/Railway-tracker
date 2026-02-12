@@ -1,11 +1,11 @@
 """Subscribe page where a user can sign up for station alerts."""
 # pylint: disable=broad-exception-caught
-import re
+from re import match
 
 import pandas as pd
 import streamlit as st
 
-from database_connection import fetch_dataframe, run_change
+from database_connection import fetch_dataframe, run_change, run_change_returning
 
 
 def add_subscribe_css() -> None:
@@ -26,7 +26,7 @@ def is_valid_email(email: str) -> bool:
     if not email:
         return False
     pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-    return re.match(pattern, email.strip()) is not None
+    return match(pattern, email.strip()) is not None
 
 
 @st.cache_data(ttl=300)
@@ -45,16 +45,40 @@ def load_station_list() -> pd.DataFrame:
     return stations
 
 
-def save_subscription(user_email: str, station_id: int) -> bool:
-    """Save a subscription row and return True if it worked."""
+def get_or_create_customer_id(user_email: str) -> int:
+    email = user_email.strip().lower()
+
+    df = fetch_dataframe(
+        "SELECT customer_id FROM customer WHERE customer_email = %s;",
+        values=(email,),
+    )
+    if df is not None and not df.empty:
+        return int(df.iloc[0]["customer_id"])
+
+    df = run_change_returning(
+        """
+        INSERT INTO customer (customer_email)
+        VALUES (%s)
+        RETURNING customer_id;
+        """,
+        values=(email,),
+    )
+    if df is None or df.empty:
+        raise ValueError("Failed to create customer.")
+    return int(df.iloc[0]["customer_id"])
+
+def save_subscription(user_email: str, station_id: int, subscription_type: str = "report") -> bool:
     try:
-        run_change("""
-    INSERT INTO subscription (customer_id, station_id)
-    VALUES (%s, %s);
-    """, values=(
-            user_email.strip().lower(), int(station_id)))
+        customer_id = get_or_create_customer_id(user_email)
+        run_change(
+            """
+            INSERT INTO subscription (customer_id, station_id, subscription_type)
+            VALUES (%s, %s, %s);
+            """,
+            values=(customer_id, int(station_id), subscription_type),
+        )
         return True
-    except Exception:  
+    except Exception:
         return False
 
 

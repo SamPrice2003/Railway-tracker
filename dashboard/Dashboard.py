@@ -24,7 +24,7 @@ from visualisations import (
     show_operator_delay_bars,
 )
 
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parent.parent  
 SIDEBAR_LOGO_PATH = BASE_DIR / "logo" / \
     "vector" / "isolated-monochrome-white.svg"
 MAIN_LOGO_PATH = BASE_DIR / "logo" / "vector" / "default-monochrome.svg"

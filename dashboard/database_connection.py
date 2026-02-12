@@ -70,4 +70,3 @@ def load_stations_with_coords() -> pd.DataFrame:
     return stations
 
 
-

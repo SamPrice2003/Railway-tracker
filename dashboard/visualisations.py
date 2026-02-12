@@ -108,7 +108,8 @@ def show_delay_gauge(delay_rate: float, key: str = "delay_gauge") -> None:
 def show_avg_delay_line(arrivals: pd.DataFrame, previous_days: int = 7, group_by: str = "H",
     smooth_window: int = 6,
     key: str = "avg_delay_sparkline",) -> None:
-    """Show a smoothed line of average delay over time."""
+    """Render a KPI and smoothed time-series chart of average delay over the last `previous_days`, 
+    grouped by the specified time frequency and displayed using a unique Streamlit key."""
     table = get_recent_arrivals(arrivals, previous_days)
     if table.empty:
         st.info("Not enough non cancelled records to plot average delay over time.")
