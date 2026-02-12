@@ -26,8 +26,8 @@ from visualisations import (
 
 BASE_DIR = Path(__file__).resolve().parent.parent  
 SIDEBAR_LOGO_PATH = BASE_DIR / "logo" / \
-    "vector" / "isolated-monochrome-white.svg"
-MAIN_LOGO_PATH = BASE_DIR / "logo" / "vector" / "default-monochrome.svg"
+    "vector" / "default-monochrome-white-text.svg"
+MAIN_LOGO_PATH = BASE_DIR / "logo" / "vector" / "gradient-logo.svg"
 
 
 def read_svg_as_b64(file_path: Path) -> str:
@@ -160,16 +160,11 @@ def pick_page() -> str:
     return page_name
 
 
-def show_main_logo() -> None:
-    """Show the main logo and subtitle at the top of the page."""
-    main_logo_b64 = read_svg_as_b64(MAIN_LOGO_PATH)
+def slogan() -> None:
     st.markdown(
-        f"""
-        <div class="ss-logo">
-          <img src="data:image/svg+xml;base64,{main_logo_b64}">
-        </div>
+        """
         <div class="ss-subtitle">
-          Live insights into UK rail reliability, delays, and cancellations.
+          Tracking shifts in train schedules for you.
         </div>
         """,
         unsafe_allow_html=True,
@@ -197,7 +192,9 @@ def get_arrivals_for_map(chosen_day: date) -> object:
 def show_dashboard() -> None:
     """Render the main dashboard page."""
     st.markdown('<div class="ss-wrapper">', unsafe_allow_html=True)
-    show_main_logo()
+    slogan()
+
+    st.markdown("")
 
     with st.spinner("Loading stations..."):
         stations_df = get_stations()
