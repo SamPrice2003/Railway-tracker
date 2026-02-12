@@ -79,10 +79,42 @@ variable "REPORTS_LAMBDA_IMAGE_URI" {
   type = string
 }
 
-variable "AWS_ECR_REPORT_REPO" {
+variable "SOURCE_EMAIL" {
   type = string
 }
 
-variable "SOURCE_EMAIL" {
+variable "STOMP_PASSWORD" {
+  type = string
+}
+
+variable "STOMP_USERNAME" {
+  type = string
+}
+
+variable "STOMP_PORT" {
+  type = string
+}
+
+variable "STOMP_TOPIC" {
+  type = string
+}
+
+variable "STOMP_HOST" {
+  type = string
+}
+
+variable "AWS_ECR_INCIDENTS_REPO" {
+  type = string
+}
+
+variable "AWS_ECR_METRICS_REPO" {
+  type = string
+}
+
+variable "AWS_ECR_DASHBOARD_REPO" {
+  type = string
+}
+
+variable "SNS_TOPIC" {
   type = string
 }

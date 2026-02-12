@@ -33,6 +33,28 @@ resource "aws_iam_role_policy_attachment" "ecs-exec-policy-attach" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+################### IAM: ECS Task Roles ###################
+
+# task role for ecs
+resource "aws_iam_role" "ecs-task-definition-role" {
+  name = "c21-railway-tracker-ecs-role"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
 ################### Security Groups ###################
 
 resource "aws_security_group" "railway-listener-sg" {
@@ -68,11 +90,13 @@ resource "aws_security_group" "railway-dashboard-sg" {
   }
 }
 
-################### ECS Task Definition: Listener ###################
+################### ECS Task Definitions ###################
 
+# task definition listener
 resource "aws_ecs_task_definition" "railway-listener-task" {
   family                   = "c21-railway-tracker-listener-task"
   requires_compatibilities = ["FARGATE"]
+  task_role_arn            = aws_iam_role.ecs-task-definition-role.arn
   execution_role_arn       = aws_iam_role.ecs-exec-role.arn
   network_mode             = "awsvpc"
   cpu                      = "256"
@@ -87,19 +111,77 @@ resource "aws_ecs_task_definition" "railway-listener-task" {
 
   container_definitions = jsonencode([
     {
-      name      = "c21-railway-tracker-listener"
-      image     = var.LISTENER_IMAGE_URI
-      essential = true
+      name         = "c21-railway-tracker-listener"
+      image        = var.LISTENER_IMAGE_URI
+      cpu          = 0
+      portMappings = []
+      essential    = true
 
       environment = [
-        { name = "AWS_REGION", value = var.AWS_REGION },
         { name = "S3_BUCKET",  value = var.S3_BUCKET_NAME },
-
-        { name = "DB_HOST", value = var.DB_HOST },
+        { name = "AWS_REGION",  value = var.AWS_REGION },
+        { name = "STOMP_PASSWORD",  value = var.STOMP_PASSWORD },
         { name = "DB_PORT", value = var.DB_PORT },
         { name = "DB_NAME", value = var.DB_NAME },
-
+        { name = "STOMP_TOPIC",  value = var.STOMP_TOPIC },
+        { name = "STOMP_PORT",  value = var.STOMP_PORT },
+        { name = "DB_HOST", value = var.DB_HOST },
+        { name = "STOMP_USERNAME",  value = var.STOMP_USERNAME },
         { name = "DB_USERNAME", value = var.DB_USERNAME },
+        { name = "AWS_ECR_INCIDENTS_REPO",  value = var.AWS_ECR_INCIDENTS_REPO },
+        { name = "STOMP_HOST",  value = var.STOMP_HOST },
+        { name = "AWS_SECRET_KEY",  value = var.AWS_SECRET_ACCESS_KEY },
+        { name = "SNS_TOPIC",  value = var.SNS_TOPIC },
+        { name = "AWS_ACCESS_KEY",  value = var.AWS_ACCESS_KEY_ID },
+        { name = "DB_PASSWORD", value = var.DB_PASSWORD }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-region        = var.AWS_REGION
+          awslogs-group         = aws_cloudwatch_log_group.listener.name
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+    }
+  ])
+}
+
+# task definition dashboard
+resource "aws_ecs_task_definition" "railway-dashboard-task" {
+  family                   = "c21-railway-tracker-dashboard-task"
+  requires_compatibilities = ["FARGATE"]
+  task_role_arn            = aws_iam_role.ecs-task-definition-role.arn
+  execution_role_arn       = aws_iam_role.ecs-exec-role.arn
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+
+  depends_on = [aws_iam_role_policy_attachment.ecs-exec-policy-attach]
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+
+  container_definitions = jsonencode([
+    {
+      name         = "c21-railway-tracker-listener"
+      image        = var.LISTENER_IMAGE_URI
+      cpu          = 0
+      portMappings = []
+      essential    = true
+
+      environment = [
+        { name = "AWS_REGION",  value = var.AWS_REGION },
+        { name = "DB_PORT", value = var.DB_PORT },
+        { name = "DB_NAME", value = var.DB_NAME },
+        { name = "DB_HOST", value = var.DB_HOST },
+        { name = "DB_USERNAME", value = var.DB_USERNAME },
+        { name = "AWS_ECR_DASHBOARD_REPO",  value = var.AWS_ECR_INCIDENTS_REPO },
+        { name = "AWS_SECRET_KEY",  value = var.AWS_SECRET_ACCESS_KEY },
+        { name = "AWS_ACCESS_KEY",  value = var.AWS_ACCESS_KEY_ID },
         { name = "DB_PASSWORD", value = var.DB_PASSWORD }
       ]
 
@@ -138,60 +220,6 @@ resource "aws_ecs_service" "railway-listener-service" {
       task_definition
     ]
   }
-}
-
-################### ECS Task Definition: Dashboard ###################
-
-resource "aws_ecs_task_definition" "railway-dashboard-task" {
-  family                   = "c21-railway-tracker-dashboard-task"
-  requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = aws_iam_role.ecs-exec-role.arn
-  network_mode             = "awsvpc"
-  cpu                      = "512"
-  memory                   = "1024"
-
-  depends_on = [aws_iam_role_policy_attachment.ecs-exec-policy-attach]
-
-  runtime_platform {
-    operating_system_family = "LINUX"
-    cpu_architecture        = "X86_64"
-  }
-
-  container_definitions = jsonencode([
-    {
-      name      = "c21-railway-tracker-dashboard"
-      image     = var.DASHBOARD_IMAGE_URI
-      essential = true
-
-      portMappings = [
-        {
-          containerPort = var.DASHBOARD_PORT
-          protocol      = "tcp"
-        }
-      ]
-
-      environment = [
-        { name = "AWS_REGION", value = var.AWS_REGION },
-        { name = "S3_BUCKET",  value = var.S3_BUCKET_NAME },
-
-        { name = "DB_HOST", value = var.DB_HOST },
-        { name = "DB_PORT", value = var.DB_PORT },
-        { name = "DB_NAME", value = var.DB_NAME },
-
-        { name = "DB_USERNAME", value = var.DB_USERNAME },
-        { name = "DB_PASSWORD", value = var.DB_PASSWORD }
-      ]
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-region        = var.AWS_REGION
-          awslogs-group         = aws_cloudwatch_log_group.dashboard.name
-          awslogs-stream-prefix = "ecs"
-        }
-      }
-    }
-  ])
 }
 
 ################### ECS Service: Dashboard ###################
