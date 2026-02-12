@@ -3,7 +3,7 @@
 import streamlit as st
 
 from database_connection import fetch_dataframe, run_change
-from subscribe_page import is_valid_email
+from subscribe_page import is_valid_email, get_sns_client, get_sns_topic_arn
 
 
 def find_customer_id(email: str) -> int | None:
@@ -20,17 +20,31 @@ def find_customer_id(email: str) -> int | None:
     return int(result.iloc[0]["customer_id"])
 
 
-def remove_customer(customer_id: int) -> None:
+def remove_subscription(user_email: str):
+    """Remove a user's subscriptions."""
+
+    sns_client = get_sns_client()
+
+    subscription_arns = [subscription["SubscriptionArn"] for subscription in sns_client.list_subscriptions_by_topic(
+        TopicArn=get_sns_topic_arn())["Subscriptions"] if subscription["Endpoint"] == user_email]
+
+    for subscription_arn in subscription_arns:
+        sns_client.unsubscribe(SubscriptionArn=subscription_arn)
+
+
+def remove_customer(customer_id: int, customer_email: str) -> None:
     """Remove a customer and any subscriptions linked to them."""
     run_change("""
     DELETE FROM subscription
     WHERE customer_id = %s;
     """, values=(customer_id,))
-    
+
     run_change("""
     DELETE FROM customer
     WHERE customer_id = %s;
     """, values=(customer_id,))
+
+    remove_subscription(customer_email)
 
 
 def render_unsubscribe_page() -> None:
@@ -59,11 +73,11 @@ def render_unsubscribe_page() -> None:
             st.markdown("<a href='?'>Back</a>", unsafe_allow_html=True)
             return
 
-        remove_customer(customer_id)
+        remove_customer(customer_id, cleaned_email)
         st.success("You have been unsubscribed.")
         st.markdown("<a href='?'>Return to dashboard</a>",
                     unsafe_allow_html=True)
 
-    except Exception:  
+    except Exception:
         st.error("Something went wrong while unsubscribing.")
         st.markdown("<a href='?'>Back</a>", unsafe_allow_html=True)
