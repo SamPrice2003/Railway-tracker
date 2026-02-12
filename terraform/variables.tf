@@ -118,3 +118,11 @@ variable "AWS_ECR_DASHBOARD_REPO" {
 variable "SNS_TOPIC" {
   type = string
 }
+
+variable "RTT_PASSWORD" {
+  type = string
+}
+
+variable "RTT_USER" {
+  type = string
+}

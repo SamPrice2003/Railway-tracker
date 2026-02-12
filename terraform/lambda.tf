@@ -70,11 +70,13 @@ resource "aws_lambda_function" "metrics" {
 
   environment {
     variables = {
-      DB_USERNAME = var.DB_USERNAME
-      DB_PASSWORD = var.DB_PASSWORD
-      DB_HOST     = var.DB_HOST
-      DB_NAME     = var.DB_NAME
-      DB_PORT     = var.DB_PORT
+      DB_USERNAME  = var.DB_USERNAME
+      DB_PASSWORD  = var.DB_PASSWORD
+      DB_HOST      = var.DB_HOST
+      DB_NAME      = var.DB_NAME
+      DB_PORT      = var.DB_PORT
+      RTT_USER     = var.RTT_USER
+      RTT_PASSWORD = var.RTT_PASSWORD
     }
   }
 }
@@ -86,19 +88,21 @@ resource "aws_lambda_function" "reports" {
   role          = aws_iam_role.lambda_exec_role.arn
   package_type = "Image"
   image_uri    = var.REPORTS_LAMBDA_IMAGE_URI
-  timeout     = 120
+  timeout     = 300
   memory_size = 512
 
   environment {
     variables = {
+      ACCESS_KEY_AWS = var.AWS_ACCESS_KEY_ID
+      SECRET_KEY_AWS = var.AWS_SECRET_ACCESS_KEY
       S3_BUCKET_NAME = var.S3_BUCKET_NAME
-      AWS_ECR_REPO   = var.AWS_ECR_REPORT_REPO
+      ECR_REPO_AWS   = var.AWS_ECR_REPORT_REPO
       SOURCE_EMAIL   = var.SOURCE_EMAIL
-      DB_USERNAME = var.DB_USERNAME
-      DB_PASSWORD = var.DB_PASSWORD
-      DB_HOST     = var.DB_HOST
-      DB_NAME     = var.DB_NAME
-      DB_PORT     = var.DB_PORT
+      DB_USERNAME    = var.DB_USERNAME
+      DB_PASSWORD    = var.DB_PASSWORD
+      DB_HOST        = var.DB_HOST
+      DB_NAME       = var.DB_NAME
+      DB_PORT       = var.DB_PORT
     }
   }
 }

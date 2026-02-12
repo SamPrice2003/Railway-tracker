@@ -64,7 +64,7 @@ resource "aws_scheduler_schedule" "report-schedule" {
     mode = "OFF"
   }
   
-  schedule_expression = "cron(1 0 * * ? *)"
+  schedule_expression = "cron(58 23 * * ? *)"
 
   target {
     arn = aws_lambda_function.c21-railway-tracker-reports-lambda.arn
