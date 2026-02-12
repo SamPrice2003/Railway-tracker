@@ -4,7 +4,9 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY Dashboard.py .
+COPY isolated-monochrome-white.svg .
+COPY default-monochrome.svg .
+COPY Dashboard.py . 
 COPY database_connection.py .
 COPY incidents_page.py .
 COPY map_visualisation.py .

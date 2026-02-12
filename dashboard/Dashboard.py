@@ -25,9 +25,8 @@ from visualisations import (
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent  
-SIDEBAR_LOGO_PATH = BASE_DIR / "logo" / \
-    "vector" / "isolated-monochrome-white.svg"
-MAIN_LOGO_PATH = BASE_DIR / "logo" / "vector" / "default-monochrome.svg"
+SIDEBAR_LOGO_PATH = BASE_DIR / "isolated-monochrome-white.svg"
+MAIN_LOGO_PATH = BASE_DIR / "default-monochrome.svg"
 
 
 def read_svg_as_b64(file_path: Path) -> str:
