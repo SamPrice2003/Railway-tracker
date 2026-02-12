@@ -19,7 +19,7 @@ def get_basic_auth(config: _Environ):
     """Returns a basic auth from credentials."""
 
     basic = HTTPBasicAuth(
-        username=ENV["RTT_USER"], password=ENV["RTT_PASSWORD"])
+        username=config["RTT_USER"], password=config["RTT_PASSWORD"])
 
     return basic
 
