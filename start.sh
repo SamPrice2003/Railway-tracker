@@ -11,15 +11,15 @@ log() {
 }
 
 
-log "🌱 Starting full infrastructure and deployment run..."
+log "🚂 Starting full infrastructure and deployment run..."
 
 
-log "🌱 Running terraform init..."
+log "🚂 Running terraform init..."
 cd "$TERRAFORM_DIR"
 terraform init
 
 
-log "🌱 Applying ECR repositories only..."
+log "🚂 Applying ECR repositories only..."
 terraform apply -auto-approve \
     -target=aws_ecr_repository.metrics-pipeline-ecr \
     -target=aws_ecr_repository.incidents-pipeline-ecr \
@@ -29,33 +29,33 @@ terraform apply -auto-approve \
 cd ..
 
 
-log "🌱 Building & pushing pipeline image..."
+log "🚂 Building & pushing pipeline image..."
 cd "$METRICS_PIPELINE_DIR"
 sh ./dockerise.sh
 cd ..
 
 
-log "🌱 Building & pushing pipeline image..."
+log "🚂 Building & pushing pipeline image..."
 cd "$INCIDENTS_PIPELINE_DIR"
 sh ./dockerise.sh
 cd ..
 
 
-log "🌱 Building & pushing dashboard image..."
+log "🚂 Building & pushing dashboard image..."
 cd "$DASHBOARD_DIR"
 sh ./dockerise.sh
 cd ..
 
 
-log "🌱 Building & pushing archive image..."
+log "🚂 Building & pushing archive image..."
 cd "$REPORT_DIR"
 sh ./dockerise.sh
 cd ..
 
 
-log "🌱 Applying remaining resources..."
+log "🚂 Applying remaining resources..."
 cd "$TERRAFORM_DIR"
 terraform apply -auto-approve
 
 
-log "🪷 All done! Infrastructure and images are fully deployed."
+log "🚂 All done! Infrastructure and images are fully deployed."
