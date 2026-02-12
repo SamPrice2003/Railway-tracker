@@ -24,18 +24,51 @@ Each of the separate directories in the project contains their own README, which
 │   └── upload_to_s3.py
 │
 ├── dashboard/
-│   ├── load_data.py
-│   ├── charts.py
-│   ├── dashboard.py
-│   └── pages/
-│       └── archive_page.py
+│   ├── Dashboard.py
+│   ├── database_connection.py
+│   ├── incidents_page.py
+│   ├── map_visualisation.py
+│   ├── metrics.py
+│   ├── subscribe_page.py
+│   ├── unsubscribe_page.py
+│   └── visualisations.py
 │
-├── pipeline/
+├── metrics_pipeline/
 │   ├── extract.py
 │   ├── transform.py
 │   ├── load.py
 │   └── pipeline.py
 │
+├── incidents_pipeline/
+│   ├── alert.py
+│   ├── extract.py
+│   ├── transform.py
+│   ├── load.py
+│   └── pipeline.py
+│ 
+├── database/
+│   └── schema.sql
+│
 └── terraform/
-    └── main.tf
+    ├── ecs.tf
+    ├── eventbridge.tf
+    ├── lambda.tf
+    ├── network.tf
+    ├── provider.tf
+    ├── s3_bucket.tf
+    └── variables.tf
 ```
+
+## 🚂 Architecture Diagram & ERD 🚂
+
+![Architecture Diagram](Signal_Shift_Architecture_Diagram.png)
+
+![ERD Diagram](database/Signal-Shift-ERD.png)
+
+## 🚂 Data Sources 🚂
+
+- The metrics pipeline takes live data from the [RTT API.](https://api.rtt.io/)
+- The incidents pipeline takes live data from the [National Rail Data Feeds.](https://opendata.nationalrail.co.uk/feeds)
+
+
+
