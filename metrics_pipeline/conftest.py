@@ -31,6 +31,10 @@ def test_mock_crs_file():
         {
             "name": "Yetminster Rail Station",
             "crs": "YET"
+        },
+        {
+            "name": "London Bridge Rail Station",
+            "crs": "LBG"
         }
     ]"""
 
