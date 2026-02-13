@@ -29,7 +29,7 @@ resource "aws_iam_role_policy" "eventbridge-metrics-role" {
   role = aws_iam_role.eventbridge-scheduler-role.id
 }
 
-resource "aws_iam_role_policy" "eventbridge-metrics-role" {
+resource "aws_iam_role_policy" "eventbridge-reports-role" {
   policy = jsonencode({
     Statement = [{
         Action = "lambda:InvokeFunction"

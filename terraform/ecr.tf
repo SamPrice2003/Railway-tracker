@@ -51,25 +51,25 @@ resource "aws_ecr_repository" "report-ecr" {
 ################### ECR IMAGES ###################
 
 # references the metrics pipeline ecr image
-data "aws_ecr_image" "" {
+data "aws_ecr_image" "metrics-pipeline-ecr" {
   repository_name = aws_ecr_repository.metrics-pipeline-ecr.name
   image_tag       = "latest"
 }
 
 # references the incidents pipeline ecr image
-data "aws_ecr_image" "" {
+data "aws_ecr_image" "incidents-pipeline-ecr" {
   repository_name = aws_ecr_repository.incidents-pipeline-ecr.name
   image_tag       = "latest"
 }
 
 # references the dashboard ecr image
-data "aws_ecr_image" "" {
+data "aws_ecr_image" "dashboard-ecr" {
   repository_name = aws_ecr_repository.dashboard-ecr.name
   image_tag       = "latest"
 }
 
 # references the report/archive ecr image
-data "aws_ecr_image" "" {
+data "aws_ecr_image" "report-ecr" {
   repository_name = aws_ecr_repository.report-ecr.name
   image_tag       = "latest"
 }
