@@ -11,8 +11,8 @@ from psycopg2 import connect, sql
 from psycopg2.extensions import connection
 from psycopg2.extras import RealDictCursor, execute_values
 
-from extract import get_stomp_listener
-from transform import get_transformed_message
+from incidents_extract import get_stomp_listener
+from incidents_transform import get_transformed_message
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)

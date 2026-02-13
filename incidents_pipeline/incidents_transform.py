@@ -10,7 +10,7 @@ from logging import getLogger, basicConfig, INFO
 
 from dotenv import load_dotenv
 
-from extract import get_stomp_listener
+from incidents_extract import get_stomp_listener
 
 logger = getLogger(__name__)
 basicConfig(level=INFO)

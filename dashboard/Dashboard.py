@@ -3,6 +3,7 @@ import base64
 from datetime import date, timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
 import streamlit as st
 from streamlit_folium import st_folium
 
@@ -24,7 +25,7 @@ from visualisations import (
     show_operator_delay_bars,
 )
 
-BASE_DIR = Path(__file__).resolve().parent.parent  
+BASE_DIR = Path(__file__).resolve().parent.parent
 SIDEBAR_LOGO_PATH = BASE_DIR / "logo" / \
     "vector" / "default-monochrome-white-text.svg"
 
@@ -250,7 +251,7 @@ def show_dashboard() -> None:
         unsafe_allow_html=True,
     )
     trend_days = st.slider(
-    "", 
+        "",
         min_value=1,
         max_value=30,
         value=7,
@@ -345,9 +346,8 @@ def show_dashboard() -> None:
         unsafe_allow_html=True,
     )
 
-
     late_limit = st.slider(
-    "",
+        "",
         min_value=1,
         max_value=10,
         value=2,
@@ -404,4 +404,5 @@ def run_app() -> None:
 
 
 if __name__ == "__main__":
+    load_dotenv()
     run_app()

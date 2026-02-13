@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 from boto3 import client
 from psycopg2.extensions import connection
 
-from extract import get_stomp_listener
-from transform import get_transformed_message
+from incidents_extract import get_stomp_listener
+from incidents_transform import get_transformed_message
 from load import get_db_connection, upload_data
 
 
