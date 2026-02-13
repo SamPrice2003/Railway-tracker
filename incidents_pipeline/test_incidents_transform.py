@@ -58,6 +58,22 @@ def test_get_corrected_types_valid_values():
     assert actual_dict["planned"] == False
 
 
+def test_get_corrected_types_valid_values_2():
+    test_dict = {
+        "incident_start": "2025-01-02T14:10:00.000Z",
+        "incident_end": "2025-01-02T18:02:00.000Z",
+        "planned": ""
+    }
+
+    actual_dict = get_corrected_types(test_dict)
+
+    assert actual_dict["incident_start"] == datetime.fromisoformat(
+        test_dict["incident_start"])
+    assert actual_dict["incident_end"] == datetime.fromisoformat(
+        test_dict["incident_end"])
+    assert actual_dict["planned"] == None
+
+
 def test_get_transformed_message_contents(test_incident_message):
     test_message = get_transformed_message(test_incident_message)
 
