@@ -5,8 +5,8 @@ from time import sleep
 
 from dotenv import load_dotenv
 
-from extract import get_stomp_listener
-from transform import get_transformed_message
+from incidents_extract import get_stomp_listener
+from incidents_transform import get_transformed_message
 from load import get_db_connection, upload_data
 from alert import get_sns_client, publish_incident
 

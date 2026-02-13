@@ -4,9 +4,9 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY extract.py .
+COPY incidents_extract.py .
 
-COPY transform.py .
+COPY incidents_transform.py .
 
 COPY load.py .
 

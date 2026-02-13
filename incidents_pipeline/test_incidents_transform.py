@@ -4,7 +4,7 @@
 
 from datetime import datetime, timezone
 
-from transform import get_filtered_message, get_corrected_types, get_transformed_message, get_services_affected
+from incidents_transform import get_filtered_message, get_corrected_types, get_transformed_message, get_services_affected
 
 
 def test_get_filtered_message_valid_columns(test_incident_message):
@@ -46,7 +46,7 @@ def test_get_corrected_types_valid_values():
     test_dict = {
         "incident_start": "2026-02-03T14:05:00.000Z",
         "incident_end": "2026-02-03T18:05:00.000Z",
-        "planned": "true"
+        "planned": "false"
     }
 
     actual_dict = get_corrected_types(test_dict)
@@ -55,7 +55,7 @@ def test_get_corrected_types_valid_values():
         test_dict["incident_start"])
     assert actual_dict["incident_end"] == datetime.fromisoformat(
         test_dict["incident_end"])
-    assert actual_dict["planned"] == True
+    assert actual_dict["planned"] == False
 
 
 def test_get_transformed_message_contents(test_incident_message):
