@@ -25,10 +25,9 @@ from visualisations import (
     show_operator_delay_bars,
 )
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-SIDEBAR_LOGO_PATH = BASE_DIR / "logo" / \
-    "vector" / "default-monochrome-white-text.svg"
-
+BASE_DIR = Path(__file__).resolve().parent.parent  
+SIDEBAR_LOGO_PATH = BASE_DIR / "isolated-monochrome-white.svg"
+MAIN_LOGO_PATH = BASE_DIR / "default-monochrome.svg"
 
 
 def read_svg_as_b64(file_path: Path) -> str:
