@@ -19,7 +19,7 @@ def get_basic_auth(config: _Environ):
     """Returns a basic auth from credentials."""
 
     basic = HTTPBasicAuth(
-        username=ENV["RTT_USER"], password=ENV["RTT_PASSWORD"])
+        username=config["RTT_USER"], password=config["RTT_PASSWORD"])
 
     return basic
 
@@ -93,8 +93,7 @@ def get_service_details(session: requests.Session,
 
         service_dict["service_uid"] = service["serviceUid"]
         service_dict["origin_station"] = service["locationDetail"]["origin"][0]["description"]
-        service_dict["destination_station"] = \
-            service["locationDetail"]["destination"][0]["description"]
+        service_dict["destination_station"] = service["locationDetail"]["destination"][0]["description"]
         service_dict["operator_name"] = service["atocName"]
 
         service_list.append(service_dict)
@@ -159,7 +158,7 @@ def extract(config: _Environ, station_crs_list: list[str]) -> dict:
     basicConfig(level=INFO)
 
     # get basic authentication for API
-    basic_auth = get_basic_auth(ENV)
+    basic_auth = get_basic_auth(config)
 
     session = requests.Session()
     session.auth = basic_auth

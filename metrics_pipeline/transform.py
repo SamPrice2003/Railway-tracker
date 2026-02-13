@@ -21,10 +21,10 @@ def get_db_connection(config: _Environ) -> connection:
     """Returns a connection to a PostgreSQL database with the environment variable credentials."""
 
     return connect(
-        dbname=ENV["DB_NAME"],
-        host=ENV["DB_HOST"],
-        user=ENV["DB_USERNAME"],
-        password=ENV["DB_PASSWORD"],
+        dbname=config["DB_NAME"],
+        host=config["DB_HOST"],
+        user=config["DB_USERNAME"],
+        password=config["DB_PASSWORD"],
         port=5432,
         cursor_factory=RealDictCursor
     )
@@ -88,7 +88,7 @@ def assign_station_id_to_arrival(df: pd.DataFrame, station_crs_list: list[dict])
 
 
 def assign_operator_id_to_service(df: pd.DataFrame, operator_name_list: list[dict]) -> pd.DataFrame:
-    """Assigns the operator name to the operator id in the database."""
+    """Assigns the operator id to the operator name in the database."""
 
     operator_name_dict = {}
     for entry in operator_name_list:

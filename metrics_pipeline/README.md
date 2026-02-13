@@ -2,7 +2,7 @@
 
 ## Overview
 
-<!--insert overview here-->
+This is an ETL pipeline which extracts all services and arrivals at stations using the Real Time Trains API, transforms and cleans the data, and loads it all into the RDS database.
 
 
 ## Installation & Setup
@@ -37,7 +37,7 @@ AWS_ECR_REPO=<your_aws_ecr_repo_name>
 
 ## Quick Start
 
-To run the pipeline for today's today at the current time, run the following commands:
+To run the pipeline to gather today's overall metrics at the current time, run the following commands:
 1. `cd metrics_pipeline`
 2. `pip3 install -r requirements.txt`
 3. `python3 load.py`

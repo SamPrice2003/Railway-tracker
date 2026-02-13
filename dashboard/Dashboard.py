@@ -3,6 +3,7 @@ import base64
 from datetime import date, timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
 import streamlit as st
 from streamlit_folium import st_folium
 
@@ -159,16 +160,11 @@ def pick_page() -> str:
     return page_name
 
 
-def show_main_logo() -> None:
-    """Show the main logo and subtitle at the top of the page."""
-    main_logo_b64 = read_svg_as_b64(MAIN_LOGO_PATH)
+def slogan() -> None:
     st.markdown(
-        f"""
-        <div class="ss-logo">
-          <img src="data:image/svg+xml;base64,{main_logo_b64}">
-        </div>
+        """
         <div class="ss-subtitle">
-          Live insights into UK rail reliability, delays, and cancellations.
+          Tracking shifts in train schedules for you.
         </div>
         """,
         unsafe_allow_html=True,
@@ -196,7 +192,9 @@ def get_arrivals_for_map(chosen_day: date) -> object:
 def show_dashboard() -> None:
     """Render the main dashboard page."""
     st.markdown('<div class="ss-wrapper">', unsafe_allow_html=True)
-    show_main_logo()
+    slogan()
+
+    st.markdown("")
 
     with st.spinner("Loading stations..."):
         stations_df = get_stations()
@@ -252,7 +250,7 @@ def show_dashboard() -> None:
         unsafe_allow_html=True,
     )
     trend_days = st.slider(
-    "", 
+        "",
         min_value=1,
         max_value=30,
         value=7,
@@ -347,9 +345,8 @@ def show_dashboard() -> None:
         unsafe_allow_html=True,
     )
 
-
     late_limit = st.slider(
-    "",
+        "",
         min_value=1,
         max_value=10,
         value=2,
@@ -406,4 +403,5 @@ def run_app() -> None:
 
 
 if __name__ == "__main__":
+    load_dotenv()
     run_app()
